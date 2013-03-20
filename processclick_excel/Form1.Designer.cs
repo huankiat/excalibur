@@ -1,4 +1,4 @@
-﻿namespace processclick_excel
+﻿namespace Excalibur
 {
     partial class Form1
     {
