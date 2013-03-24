@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Excalibur.Models;
 
-namespace Excalibur.Models
+namespace Excalibur.Tests
 {
     using NUnit.Framework;
 
