@@ -67,6 +67,7 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.comboBox2);
             this.Name = "Form1";
+            this.Text = "Subscription";
             this.ResumeLayout(false);
             this.PerformLayout();
 

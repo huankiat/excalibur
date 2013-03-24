@@ -57,6 +57,9 @@ namespace ExcelAddIn1
 
             Channel ch = new Channel();
             rng.Value = ch.getChannelData(channelID[0]);
+            rng.Name = "SUB_" + channelID[0] + "_" + channelID[1];
+
+            Form1.ActiveForm.Close();
 
         }
 

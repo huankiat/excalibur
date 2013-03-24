@@ -12,11 +12,21 @@
               screentip="Send data" onAction="OnPubButton"
               supertip="Send data to channel"/>
 
-            <button id="registerButton" label="Register"
-              screentip="Register workbook" onAction="OnRegButton"
-              supertip="Register workbook with an unique ID"/>
+            <button id="republishButton" label="Refresh"
+              screentip="Refresh workbook" onAction="OnRefreshButton"
+              supertip="Refresh published and subscribed datafeeds"/>
             
         </group>
+        <group id="Setting"
+               label="Setting">
+
+          <button id="registerButton" label="Register"
+            screentip="Register workbook" onAction="OnRegButton"
+            supertip="Register workbook with an unique ID"/>
+
+        </group>
+        
+        
       </tab>
     </tabs>
   </ribbon>

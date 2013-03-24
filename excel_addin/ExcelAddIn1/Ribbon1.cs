@@ -118,5 +118,41 @@ namespace ExcelAddIn1
             properties.Add("Excalibur ID", false, Microsoft.Office.Core.MsoDocProperties.msoPropertyTypeString,fileID);
         }
 
+        public void onRefreshButton(Office.IRibbonControl control)
+        {
+            Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
+            Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
+            
+            foreach (Excel.Name nRange in wb.Names)
+            {
+                string full_name = nRange.Name.ToString();
+                nRange.Name = full_name;
+
+                if (full_name.Substring(0, 3) == "SUB" | full_name.Substring(0, 3) == "PUB")
+                {
+                    string partial_name = full_name.Substring(4);
+                    char[] delim = { '_' };
+                    string[] splitTxt = partial_name.Split(delim);
+                    string cellID = splitTxt[0];
+                    int channelID = Convert.ToInt32(cellID);
+                    string cellDesc = splitTxt[1];
+
+                    Channel ch = new Channel();
+
+                    if (full_name.Substring(0, 3) == "SUB")
+                    {
+                        nRange.RefersToRange.Value = ch.getChannelData(cellID);
+                    }
+                    else
+                    {
+                        int r_value = (int) nRange.RefersToRange.Value;
+                        string txt = ch.rePublishChannel(channelID, cellDesc, r_value);
+                        MessageBox.Show(txt, "Response");
+                    }
+                }
+            }
+
+        }
+
     }
 }

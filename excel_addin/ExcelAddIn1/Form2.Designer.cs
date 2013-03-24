@@ -36,15 +36,15 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(52, 40);
+            this.label1.Location = new System.Drawing.Point(48, 42);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(92, 13);
+            this.label1.Size = new System.Drawing.Size(98, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Name of datafeed";
+            this.label1.Text = "Name the datafeed";
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(38, 67);
+            this.textBox1.Location = new System.Drawing.Point(36, 67);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(122, 20);
             this.textBox1.TabIndex = 1;
@@ -68,7 +68,7 @@
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
             this.Name = "Form2";
-            this.Text = "Form2";
+            this.Text = "Publish";
             this.ResumeLayout(false);
             this.PerformLayout();
 

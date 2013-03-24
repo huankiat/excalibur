@@ -7,16 +7,18 @@ using System.Net;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Excel = Microsoft.Office.Interop.Excel;
 
 
 namespace Excalibur.Models
 {
     public class Channel
     {
-        public string getChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
-        public string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
-        public string channelDataURL = "http://panoply-staging.herokuapp.com/api/channels/";
-        public string fileIDURL = "http://panoply-staging.herokuapp.com/api/spreadsheets.json";
+        private string getChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
+        private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
+        private string channelDataURL = "http://panoply-staging.herokuapp.com/api/channels/";
+        private string fileIDURL = "http://panoply-staging.herokuapp.com/api/spreadsheets.json";
+        private string rePubURL = "http://panoply-staging.herokuapp.com/api/channels/";
 
         public JArray getAllChannels()
         {
@@ -95,9 +97,52 @@ namespace Excalibur.Models
             StreamReader reader = new StreamReader(dataStream);
 
             string responseFromServer = reader.ReadToEnd();
+            dynamic json = JValue.Parse(responseFromServer);
+            string returnID = json.id;
+            reader.Close();
+            response.Close();
 
-            return responseFromServer;
+            return returnID;
             
+
+        }
+
+        public string rePublishChannel(int channelID, string description, int value)
+        {
+            var jsonObject = new JObject();
+            dynamic datafeed = jsonObject;
+            datafeed.channel = new JObject();
+
+            dynamic data = new JObject();
+            data.id = channelID;
+            data.description = description;
+            data.value = value;
+
+            datafeed.channel = data;
+
+            byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(rePubURL + channelID + ".json");
+            request.Method = "PUT";
+            request.Accept = "application/json";
+            request.ContentType = "application/json";
+            request.ContentLength = byteArray.Length;
+
+            Stream dataStream = request.GetRequestStream();
+            dataStream.Write(byteArray, 0, byteArray.Length);
+            dataStream.Close();
+
+            //receive response
+            WebResponse response = request.GetResponse();
+            dataStream = response.GetResponseStream();
+            StreamReader reader = new StreamReader(dataStream);
+
+            string responseFromServer = reader.ReadToEnd();
+            reader.Close();
+            response.Close();
+
+            return datafeed.ToString();
+
 
         }
 
@@ -140,6 +185,26 @@ namespace Excalibur.Models
             return fileID;
         }
 
+
+    }
+
+    public class ExcelRange
+    {
+     
+        public string cellName { get; set; }
+        public string cellValue { get; set; }
+        public Excel.Range rng { get; set; }
+
+        public void nameCell()
+        {
+            this.rng.Name = this.cellName;
+        }
+
+        public void writeNameCell()
+        {
+            this.rng.Value = this.cellValue;
+        }
+        
 
     }
 }

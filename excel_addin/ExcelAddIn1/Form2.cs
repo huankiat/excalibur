@@ -28,11 +28,15 @@ namespace ExcelAddIn1
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
-
+ 
             Channel ch = new Channel();
-            string responseTxt = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString());
+            string returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString());
+            rng.Name = "PUB_" + returnID + "_" + textBox1.Text.ToString(); 
+            
             Form2.ActiveForm.Close();
-            MessageBox.Show(responseTxt, "Response from Server");
+            MessageBox.Show("Published as " + returnID, "Response from Server");
         }
+
+
     }
 }
