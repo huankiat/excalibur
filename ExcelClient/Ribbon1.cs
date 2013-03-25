@@ -34,7 +34,7 @@ using Excalibur.Models;
 // For more information, see the Ribbon XML documentation in the Visual Studio Tools for Office Help.
 
 
-namespace ExcelAddIn1
+namespace Excalibur.ExcelClient
 {
     [ComVisible(true)]
     public class Ribbon1 : Office.IRibbonExtensibility
@@ -49,7 +49,7 @@ namespace ExcelAddIn1
 
         public string GetCustomUI(string ribbonID)
         {
-            return GetResourceText("ExcelAddIn1.Ribbon1.xml");
+            return GetResourceText("Excalibur.ExcelClient.Ribbon1.xml");
         }
 
         #endregion

@@ -14,7 +14,7 @@ using Newtonsoft.Json.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Excalibur.Models;
 
-namespace ExcelAddIn1
+namespace Excalibur.ExcelClient
 {
     public partial class Form1 : Form
     {

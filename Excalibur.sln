@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Excalibur", "excalibur\Excalibur.csproj", "{DEF68E79-1AB4-4EEC-B563-1AE12ED67F0B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelAddIn1", "excel_addin\ExcelAddIn1.csproj", "{700333A8-5BB3-44D2-9D51-405A1C621DDB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelClient", "ExcelClient\ExcelClient.csproj", "{700333A8-5BB3-44D2-9D51-405A1C621DDB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

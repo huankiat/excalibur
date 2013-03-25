@@ -11,7 +11,7 @@ using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ExcelAddIn1
+namespace Excalibur.ExcelClient
 {
     public partial class ThisAddIn
     {
