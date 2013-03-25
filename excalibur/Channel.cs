@@ -8,6 +8,8 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
+using Office = Microsoft.Office.Core;
+using Microsoft.Office.Tools.Excel;
 
 
 namespace Excalibur.Models
@@ -183,6 +185,23 @@ namespace Excalibur.Models
             response.Close();
 
             return fileID;
+        }
+
+        public string checkFileID(Excel.Workbook wb)
+        {
+            string propertyName = "Excalibur ID";
+            Office.DocumentProperties properties;
+            properties = (Office.DocumentProperties)wb.CustomDocumentProperties;
+            
+            foreach(Office.DocumentProperty prop in properties)
+            {
+                if (prop.Name.ToString() == propertyName)
+                {
+                    return prop.Value.ToString();
+                }
+            }
+            return "Nil";
+            
         }
 
 

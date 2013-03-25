@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
@@ -17,10 +18,35 @@ namespace Excalibur.ExcelClient
     {
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
+            Office.CommandBar cellbar = this.Application.CommandBars["Cell"];
+            Office.CommandBarButton button = (Office.CommandBarButton) cellbar.FindControl
+                (Office.MsoControlType.msoControlButton, 0, 
+                "MYRIGHTCLICKMENU", Missing.Value, Missing.Value);
+
+            if (button == null)
+            {
+                //subscribe button
+                button = (Office.CommandBarButton)cellbar.Controls.
+                    Add(Office.MsoControlType.msoControlButton,
+                    Missing.Value, Missing.Value, cellbar.Controls.Count, true);
+                button.Caption = "Subscribe";
+                button.BeginGroup = true;
+                button.Tag = "MYRIGHTCLICKMENU";
+                Form1 fm1 = new Form1();
+                button.Click += new Office._CommandBarButtonEvents_ClickEventHandler(showSubForm);
+            }
+
+        }
+
+        private void showSubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
+        {
+            Form1 frm = new Form1();
+            frm.Show();
         }
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
+            Application.CommandBars["Cell"].Reset();
         }
 
         #region VSTO generated code

@@ -112,10 +112,19 @@ namespace Excalibur.ExcelClient
             properties = (Office.DocumentProperties)wb.CustomDocumentProperties;
 
             Channel ch = new Channel();
-            string fileID = ch.getFileID(filename);
-            MessageBox.Show(fileID, "File ID");
+            if (ch.checkFileID(wb) == "Nil")
+            {
+                string fileID = ch.getFileID(filename);
+                MessageBox.Show(fileID, "File ID");
 
-            properties.Add("Excalibur ID", false, Microsoft.Office.Core.MsoDocProperties.msoPropertyTypeString,fileID);
+                properties.Add("Excalibur ID", false,
+                    Microsoft.Office.Core.MsoDocProperties.msoPropertyTypeString, fileID);
+            }
+            else
+            {
+                MessageBox.Show("ID Exists - Excalibur ID: " + ch.checkFileID(wb), "File Already Registered");
+            }
+
         }
 
         public void onRefreshButton(Office.IRibbonControl control)
