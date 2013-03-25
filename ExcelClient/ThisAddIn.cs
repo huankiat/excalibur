@@ -22,25 +22,44 @@ namespace Excalibur.ExcelClient
             Office.CommandBarButton button = (Office.CommandBarButton) cellbar.FindControl
                 (Office.MsoControlType.msoControlButton, 0, 
                 "MYRIGHTCLICKMENU", Missing.Value, Missing.Value);
+            Office.CommandBarButton button2 = (Office.CommandBarButton)cellbar.FindControl
+                (Office.MsoControlType.msoControlButton, 1,
+                "MYRIGHTCLICKMENU", Missing.Value, Missing.Value);
 
-            if (button == null)
+            if (button == null & button2== null)
             {
                 //subscribe button
                 button = (Office.CommandBarButton)cellbar.Controls.
                     Add(Office.MsoControlType.msoControlButton,
-                    Missing.Value, Missing.Value, cellbar.Controls.Count, true);
+                    Missing.Value, Missing.Value, 1, true);
                 button.Caption = "Subscribe";
                 button.BeginGroup = true;
                 button.Tag = "MYRIGHTCLICKMENU";
-                Form1 fm1 = new Form1();
                 button.Click += new Office._CommandBarButtonEvents_ClickEventHandler(showSubForm);
+
+                //publish button
+                button2 = (Office.CommandBarButton)cellbar.Controls.
+                    Add(Office.MsoControlType.msoControlButton,
+                    Missing.Value, Missing.Value, 2, true);
+                button2.Caption = "Publish";
+                button2.BeginGroup = false;
+                button2.Tag = "MYRIGHTCLICKMENU";
+                button2.Click += new Office._CommandBarButtonEvents_ClickEventHandler(showPubForm);
             }
+
+           
 
         }
 
         private void showSubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
         {
             Form1 frm = new Form1();
+            frm.Show();
+        }
+
+        private void showPubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
+        {
+            Form2 frm = new Form2();
             frm.Show();
         }
 
