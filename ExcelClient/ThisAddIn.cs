@@ -20,6 +20,7 @@ namespace Excalibur.ExcelClient
     {
         Office.CommandBarButton subButton;
         Office.CommandBarButton pubButton;
+        Office.CommandBarButton refreshButton;
         
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
@@ -44,11 +45,11 @@ namespace Excalibur.ExcelClient
             pubButton.Tag = "pubButton";
             pubButton.Click += new Office._CommandBarButtonEvents_ClickEventHandler(showPubForm);
 
-            //publish button 
-            pubButton = (Office.CommandBarButton)cellbar.Controls.Add();
-            pubButton.Caption = "Refresh";
-            pubButton.Tag = "refreshButton";
-            pubButton.Click += new Office._CommandBarButtonEvents_ClickEventHandler(refreshAll);
+            //refresh button 
+            refreshButton = (Office.CommandBarButton)cellbar.Controls.Add();
+            refreshButton.Caption = "Refresh";
+            refreshButton.Tag = "refreshButton";
+            refreshButton.Click += new Office._CommandBarButtonEvents_ClickEventHandler(refreshAll);
         }
 
         private void showSubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
@@ -97,6 +98,7 @@ namespace Excalibur.ExcelClient
                 }
             }
         }
+
 
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
