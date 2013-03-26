@@ -21,10 +21,17 @@ namespace Excalibur.ExcelClient
         public Form1()
         {
             InitializeComponent();
+            InitializeComboBox();
 
+        }
+
+           
+
+        private void InitializeComboBox()
+        {
             Channel ch = new Channel();
             JArray datafeed = ch.getAllChannels();
-            
+
             if (datafeed.ToString() != "[]")
             {
                 foreach (dynamic data in datafeed)
@@ -37,14 +44,6 @@ namespace Excalibur.ExcelClient
                 comboBox2.Items.Add("No data in the channel");
                 comboBox2.SelectedIndex = 0;
             }
-
-        }
-
-           
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -60,7 +59,7 @@ namespace Excalibur.ExcelClient
             rng.Name = "SUB_" + channelID[0] + "_" + channelID[1];
 
             Form1.ActiveForm.Close();
-
+       
         }
 
 
