@@ -1,12 +1,13 @@
 ﻿using System;
-using System.Net;
+using System.Net.Fakes;
 using System.IO;
 using System.Collections.Generic;
 using NUnit.Framework;
-using Moq;
 using Excalibur;
 using Excalibur.Models;
 using Newtonsoft.Json.Linq;
+using Microsoft.QualityTools.Testing.Fakes;
+using Moq;
 
 namespace ExcaliburTests
 {
@@ -16,24 +17,34 @@ namespace ExcaliburTests
         [Test]
         public void GetAllChannelsTest()
         {
-            var responseStream = new FileStream("Fixtures/v1.channels.index.response", FileMode.Open);
+            using (ShimsContext.Create())
+            {
+                var responseStream = new FileStream("Fixtures/v1.channels.index.response", FileMode.Open);
+                var responseShim = new ShimHttpWebResponse()
+                {
+                     GetResponseStream = () => responseStream
+                };
+                String actualMethod = "";
+                var requestShim = new ShimHttpWebRequest()
+                {
+                    MethodSetString = (method) => { actualMethod = method; },
+                    GetResponse = () => responseShim
+                };
 
-            var response = new Mock<HttpWebResponse>();
-            response.Setup(m => m.GetResponseStream())
-                .Returns(responseStream);
+                String actualURL = "";
+                ShimWebRequest.CreateString = (url) =>
+                {
+                    actualURL = url;
+                    return requestShim;
+                };
 
-            var request = new Mock<HttpWebRequest>();            
-            request.SetupSet(m => m.Method = "GET");
-            request.Setup(m => m.GetResponse())
-                .Returns(response.Object);
-
-            var factory = new Mock<IWebRequestFactory>();
-            factory.Setup(m => m.Create("http://panoply-staging.herokuapp.com/api/channels.json"))
-                .Returns(request.Object);
-
-            Channel ch = new Channel(factory.Object);
-            JArray json = ch.getAllChannels();
-            Assert.AreEqual(2, json.Count);
+                Channel ch = new Channel();
+                JArray json = ch.getAllChannels();
+                
+                StringAssert.AreEqualIgnoringCase("GET", actualMethod);
+                StringAssert.AreEqualIgnoringCase("http://panoply-staging.herokuapp.com/api/channels.json", actualURL);
+                Assert.AreEqual(2, json.Count);
+            }
         }
     }
 }

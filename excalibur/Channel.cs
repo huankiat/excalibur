@@ -17,17 +17,6 @@ namespace Excalibur.Models
    
     public class Channel
     {
-        public IWebRequestFactory WebRequestFactory { get; private set; }
-
-        public Channel()
-        {
-            WebRequestFactory = new HttpWebRequestFactory();
-        }
-
-        public Channel(IWebRequestFactory webRequestFactory)
-        {
-            WebRequestFactory = webRequestFactory;
-        }
 
         private string getChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
         private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
@@ -37,7 +26,7 @@ namespace Excalibur.Models
 
         public JArray getAllChannels()
         {
-            HttpWebRequest request = WebRequestFactory.Create(getChannelURL);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getChannelURL);
             request.Method = "GET";
             request.Accept = "application/json";
             request.ContentType = "application/json";
@@ -62,7 +51,7 @@ namespace Excalibur.Models
 
         public string getChannelData(string channelID)
         {
-            HttpWebRequest request = WebRequestFactory.Create(channelDataURL + channelID + ".json");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
             request.Method = "GET";
             request.Accept = "application/json";
             request.ContentType = "application/json";
@@ -96,7 +85,7 @@ namespace Excalibur.Models
             datafeed.channel = data;
             byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
-            HttpWebRequest request = WebRequestFactory.Create(postChannelURL);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postChannelURL);
             request.Method = "POST";
             request.Accept = "application/json";
             request.ContentType = "application/json";
@@ -137,7 +126,7 @@ namespace Excalibur.Models
 
             byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
-            HttpWebRequest request = WebRequestFactory.Create(rePubURL + channelID + ".json");
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(rePubURL + channelID + ".json");
             request.Method = "PUT";
             request.Accept = "application/json";
             request.ContentType = "application/json";
@@ -173,7 +162,7 @@ namespace Excalibur.Models
             datafeed.spreadsheet = data;
             byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
-            HttpWebRequest request = WebRequestFactory.Create(fileIDURL);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fileIDURL);
             request.Method = "POST";
             request.Accept = "application/json";
             request.ContentType = "application/json";
