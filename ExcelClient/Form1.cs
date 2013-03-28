@@ -18,10 +18,22 @@ namespace Excalibur.ExcelClient
 {
     public partial class Form1 : Form
     {
+
+        string currentValue;
+        string dataID;
+        string dataName;
+        string dataValue;
+        Channel ch;
+        
         public Form1()
         {
+            
+            ch = new Channel();
+            currentValue = "";
             InitializeComponent();
             InitializeComboBox();
+
+        
 
         }
 
@@ -29,9 +41,8 @@ namespace Excalibur.ExcelClient
 
         private void InitializeComboBox()
         {
-            Channel ch = new Channel();
-            JArray datafeed = ch.getAllChannels();
 
+            JArray datafeed = ch.getAllChannels();
             if (datafeed.ToString() != "[]")
             {
                 foreach (dynamic data in datafeed)
@@ -46,22 +57,58 @@ namespace Excalibur.ExcelClient
             }
         }
 
+        private void comboxbox1_Select(object sender, EventArgs e)
+        {
+            Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
+            Excel._Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
+            Excel.Range rng = (Excel.Range)exApp.ActiveCell;
+            
+            this.currentValue = rng.Value.ToString();
+            
+            string[] channelID = comboBox2.SelectedItem.ToString().Split(new string[] {"-"}, StringSplitOptions.None);
+            
+            this.dataID = channelID[0];
+            this.dataName = channelID[1];
+            this.dataValue = ch.getChannelData(this.dataID);
+            Clipboard.SetDataObject(this.dataValue);
+
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
-            Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
+            Excel._Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
-            
-            string[] channelID = comboBox2.SelectedItem.ToString().Split(new string[] {"-"}, StringSplitOptions.None);
 
-            Channel ch = new Channel();
-            rng.Value = ch.getChannelData(channelID[0]);
-            rng.Name = "SUB_" + channelID[0] + "_" + channelID[1];
+            rng.Name = "SUB_" + this.dataID + "_" + this.dataName;
+
+            rng.PasteSpecial(Excel.XlPasteType.xlPasteAll, 
+                Excel.XlPasteSpecialOperation.xlPasteSpecialOperationNone,
+                Type.Missing, 
+                Type.Missing);
 
             Form1.ActiveForm.Close();
        
         }
 
+        private void button1_MouseEnter(object sender, EventArgs e)
+        {
+            Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
+            Excel.Range rng = (Excel.Range)exApp.ActiveCell;
+            
+            currentValue = rng.Value.ToString();
+            rng.Value = this.dataValue;
+
+        }
+
+        private void button1_MouseLeave(object sender, EventArgs e)
+        {
+            Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
+            Excel.Range rng = (Excel.Range)exApp.ActiveCell;
+
+            rng.Value = this.currentValue;
+
+        }
 
         
     }
