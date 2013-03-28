@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="Ribbon_Load">
+  <ribbon>
+    <tabs>
+      <tab id="ExcaliburTab" label="EXCALIBUR">
+        <group id="DataFeed"
+               label="DataFeed">
+          <button id="subscribeButton" label="Subscribe" 
+                  size="large" imageMso ="GetExternalDataFromWeb"
+              screentip="Get data" onAction="OnSubButton"
+              supertip="Get data from channel"/>
+
+          <button id="publishButton" label="Publish"
+                  size="large" imageMso ="GoToNewRecord"
+            screentip="Send data" onAction="OnPubButton"
+            supertip="Send data to channel"/>
+    
+            <button id="republishButton" label="Refresh"
+                    size ="large" imageMso ="DatabaseLinedTableManager"
+              screentip="Refresh workbook" onAction="OnRefreshButton"
+              supertip="Refresh published and subscribed datafeeds"/>
+     
+          
+        </group>
+        
+        
+        <group id="Setting"
+               label="Setting">
+
+          <button id="registerButton" label="Register Workbook" 
+                  size="large" imageMso ="SetLanguage"
+            screentip="Register workbook" onAction="OnRegButton"
+            supertip="Register workbook with an unique ID"/>
+          
+          <button id="loginButton" label="Sign In"
+                  size="large" imageMso ="SetLanguage"
+            screentip="User login" onAction="OnLoginButton"
+            supertip="Logging in to use features"/>
+
+        </group>
+        
+        
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>
+
