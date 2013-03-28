@@ -54,13 +54,13 @@ namespace Excalibur.ExcelClient
 
         private void showSubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
         {
-            Form1 frm1 = new Form1();
+            SubForm frm1 = new SubForm();
             frm1.Show();
         }
 
         private void showPubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
         {
-            Form2 frm2 = new Form2();
+            PubForm frm2 = new PubForm();
             frm2.Show();       
         }
 
@@ -121,7 +121,7 @@ namespace Excalibur.ExcelClient
 
         protected override Microsoft.Office.Core.IRibbonExtensibility CreateRibbonExtensibilityObject()
         {
-            return new Ribbon1();
+            return new ExcaliburRibbon();
         }
 
     }
