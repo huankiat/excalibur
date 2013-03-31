@@ -131,7 +131,8 @@ namespace Excalibur.ExcelClient
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
-            
+            Channel ch = new Channel();
+
             foreach (Excel.Name nRange in wb.Names)
             {
                 string full_name = nRange.Name.ToString();
@@ -146,7 +147,6 @@ namespace Excalibur.ExcelClient
                     int channelID = Convert.ToInt32(cellID);
                     string cellDesc = splitTxt[1];
 
-                    Channel ch = new Channel();
 
                     if (full_name.Substring(0, 3) == "SUB")
                     {
@@ -154,9 +154,17 @@ namespace Excalibur.ExcelClient
                     }
                     else
                     {
-                        int r_value = (int) nRange.RefersToRange.Value;
-                        string txt = ch.rePublishChannel(channelID, cellDesc, r_value);
-                        MessageBox.Show(txt, "Response");
+                        if (ch.checkFileID(wb) == "Nil")
+                        {
+                            MessageBox.Show("You need to register this workbook", "Alert");
+                        }
+                        else
+                        {
+                            int r_value = (int)nRange.RefersToRange.Value;
+                            int fileID = Convert.ToInt32(ch.checkFileID(wb));
+                            string txt = ch.rePublishChannel(channelID, cellDesc, r_value, fileID, false);
+                            MessageBox.Show(txt, "Response");
+                        }
                     }
                 }
             }

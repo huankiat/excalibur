@@ -26,15 +26,26 @@ namespace Excalibur.ExcelClient
         private void button1_Click(object sender, EventArgs e)
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
+            Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
  
             Channel ch = new Channel();
-            string returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString());
-            rng.Name = "PUB_" + returnID + "_" + textBox1.Text.ToString(); 
-            
+            string returnID;
+
+            if (ch.checkFileID(wb) == "Nil")
+            {
+                MessageBox.Show("Need to register the workbook first", "Alert");
+            }
+            else
+            {
+                int fileID = Convert.ToInt32(ch.checkFileID(wb));
+                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), fileID);
+                rng.Name = "PUB_" + returnID + "_" + textBox1.Text.ToString();
+                MessageBox.Show("Published as " + returnID, "Response from Server");
+            }
             PubForm.ActiveForm.Close();
-            MessageBox.Show("Published as " + returnID, "Response from Server");
+        
         }
 
 
