@@ -72,7 +72,7 @@ namespace Excalibur.Models
                 return data;
             }
         }
-
+      
         public string publishChannel(string description, string value, int spreadsheet_id)
         {
             var jsonObject = new JObject();
@@ -127,7 +127,7 @@ namespace Excalibur.Models
             data.spreadsheet_id = spreadsheet_id;
 
             datafeed.channel = data;
-            datafeed.can_override = to_replace;
+            datafeed.forced = to_replace;
 
             byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
@@ -329,11 +329,16 @@ namespace Excalibur.Models
         private string authToken;
         private Cookie excaliburCookie;
         private CookieContainer cContainer;
-        Uri cURI;
+        private Uri cURI;
 
         public AuthToken()
         {
             cURI = new Uri("http://www.processclick.com/");
+        }
+
+        public void setCookieURI(Uri cookieURI)
+        {
+            cURI = cookieURI;
         }
 
         public void setToken(string token)

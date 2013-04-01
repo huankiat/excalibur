@@ -32,6 +32,12 @@ namespace Excalibur.ExcelClient
  
             Channel ch = new Channel();
             string returnID;
+            Excel.IconSetCondition isc = (Excel.IconSetCondition)rng.FormatConditions.AddIconSetCondition();
+            isc.ShowIconOnly = true;
+            isc.IconSet = wb.IconSets[Excel.XlIconSet.xl3Triangles];
+            isc.IconCriteria[2].Type = Excel.XlConditionValueTypes.xlConditionValueNumber;
+            isc.IconCriteria[2].Value = 0;
+            isc.IconCriteria[2].Operator = (int)(Excel.XlFormatConditionOperator.xlNotEqual);
 
             if (ch.checkFileID(wb) == "Nil")
             {

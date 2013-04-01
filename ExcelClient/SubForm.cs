@@ -74,6 +74,7 @@ namespace Excalibur.ExcelClient
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel._Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
+            Excel._Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
 
             string[] channelID = comboBox2.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
@@ -85,6 +86,10 @@ namespace Excalibur.ExcelClient
             rng.Name = "SUB_" + dataID + "_" + dataName;
 
             rng.Value = dataValue;
+
+            //Excel.IconSetCondition isc = (Excel.IconSetCondition)rng.FormatConditions.AddIconSetCondition();
+            //isc.ShowIconOnly = true;
+            //isc.IconSet = wb.IconSets[Excel.XlIconSet.xl3Triangles];
 
             SubForm.ActiveForm.Close();
        
