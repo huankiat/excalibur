@@ -132,42 +132,10 @@ namespace Excalibur.ExcelClient
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Channel ch = new Channel();
-
-            foreach (Excel.Name nRange in wb.Names)
-            {
-                string full_name = nRange.Name.ToString();
-                nRange.Name = full_name;
-
-                if (full_name.Substring(0, 3) == "SUB" | full_name.Substring(0, 3) == "PUB")
-                {
-                    string partial_name = full_name.Substring(4);
-                    char[] delim = { '_' };
-                    string[] splitTxt = partial_name.Split(delim);
-                    string cellID = splitTxt[0];
-                    int channelID = Convert.ToInt32(cellID);
-                    string cellDesc = splitTxt[1];
-
-
-                    if (full_name.Substring(0, 3) == "SUB")
-                    {
-                        nRange.RefersToRange.Value = ch.getChannelData(cellID);
-                    }
-                    else
-                    {
-                        if (ch.checkFileID(wb) == "Nil")
-                        {
-                            MessageBox.Show("You need to register this workbook", "Alert");
-                        }
-                        else
-                        {
-                            int r_value = (int)nRange.RefersToRange.Value;
-                            int fileID = Convert.ToInt32(ch.checkFileID(wb));
-                            string txt = ch.rePublishChannel(channelID, cellDesc, r_value, fileID, false);
-                            MessageBox.Show(txt, "Response");
-                        }
-                    }
-                }
-            }
+            
+            string txt = ch.channelsRefresh(wb);
+            MessageBox.Show(txt, "Refresh");
+           
 
         }
 

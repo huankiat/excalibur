@@ -231,17 +231,73 @@ namespace Excalibur.Models
             dataStream.Close();
 
             //receive response
-            WebResponse response = request.GetResponse();
-            dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
+            WebResponse response;
+            string returnID = "";
+            try
+            {
+                response = request.GetResponse();
+                dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
 
-            string responseFromServer = reader.ReadToEnd();
-            dynamic json = JValue.Parse(responseFromServer);
-            string returnID = json.authentication_token;
-            reader.Close();
-            response.Close();
-
+                string responseFromServer = reader.ReadToEnd();
+                dynamic json = JValue.Parse(responseFromServer);
+                returnID = json.authentication_token;
+                reader.Close();
+                response.Close();
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse webResponse = ex.Response as HttpWebResponse;
+                if (webResponse.StatusCode == HttpStatusCode.NotFound)
+                {
+                    returnID = "404";
+                }
+                webResponse.Close();
+            }
+           
             return returnID;
+        }
+
+        public string channelsRefresh(Excel.Workbook wb)
+        {
+            string message = "Error in refreshing";
+            
+            foreach (Excel.Name nRange in wb.Names)
+            {
+                string full_name = nRange.Name.ToString();
+                nRange.Name = full_name;
+
+                if (full_name.Substring(0, 3) == "SUB" | full_name.Substring(0, 3) == "PUB")
+                {
+                    string partial_name = full_name.Substring(4);
+                    char[] delim = { '_' };
+                    string[] splitTxt = partial_name.Split(delim);
+                    string cellID = splitTxt[0];
+                    int channelID = Convert.ToInt32(cellID);
+                    string cellDesc = splitTxt[1];
+
+
+                    if (full_name.Substring(0, 3) == "SUB")
+                    {
+                        nRange.RefersToRange.Value = this.getChannelData(cellID);
+                    }
+                    else
+                    {
+                        if (this.checkFileID(wb) == "Nil")
+                        {
+                            message = "You need to register this workbook";
+                        }
+                        else
+                        {
+                            int r_value = (int)nRange.RefersToRange.Value;
+                            int fileID = Convert.ToInt32(this.checkFileID(wb));
+                            message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, false);
+                            
+                        }
+                    }
+                }
+            }
+            return message;
         }
 
 
@@ -271,29 +327,59 @@ namespace Excalibur.Models
     public class AuthToken
     {
         private string authToken;
-        Cookie excaliburCookie;
+        private Cookie excaliburCookie;
+        private CookieContainer cContainer;
+        Uri cURI;
+
+        public AuthToken()
+        {
+            cURI = new Uri("http://www.processclick.com/");
+        }
 
         public void setToken(string token)
         {
             authToken = token;
         }
 
+        public Cookie getCookie()
+        {
+            return excaliburCookie;
+        }
     
 
-        private void createCookie()
-        {
-            Cookie c = new Cookie("ExcaliburToken",authToken);
-            excaliburCookie = c;
-        }
-
-        public CookieContainer createCookieContainer()
+        public void createCookieInContainer()
         {
             CookieContainer cc = new CookieContainer();
-            createCookie();
-            cc.Add(excaliburCookie);
-            return cc;
+            Cookie c = new Cookie();
+            cc.MaxCookieSize = 5000;
+
+            c.Value = authToken;
+            c.Name = "ExcaliburToken";
+            cc.Add(cURI, c);
+            excaliburCookie = c;
+            cContainer = cc;
         }
 
+        public string readTokenFromCookie()
+        {
+            string token;
+            CookieCollection cookies = new CookieCollection();
+
+            cookies = cContainer.GetCookies(cURI);
+            token = "No cookie detected";
+
+            for (int i=0; i<cookies.Count; i++) 
+            {
+                Cookie c = cookies[i];
+                if (c.Name == "ExcaliburToken")
+                {
+                    token = c.Value;
+                }
+
+            }
+
+            return token;
+        }
 
     }
 }

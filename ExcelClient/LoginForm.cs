@@ -16,17 +16,37 @@ namespace Excalibur.ExcelClient
         {
             InitializeComponent();
             InitializePasswordBox();
+            loginErrorLabel.Visible = false;
         }
 
         private void loginButton_Click(object sender, EventArgs e)
         {
             Channel ch = new Channel();
+            AuthToken authtoken = new AuthToken();
             
             string username = usernameBox.Text.ToString();
             string password = passwordBox.Text.ToString();
             string token = ch.getToken(username, password);
-            LoginForm.ActiveForm.Close();
-            MessageBox.Show(token);
+
+            if (token == "404")
+            {
+                loginErrorLabel.Visible = true;
+            }
+            else
+            {
+                loginErrorLabel.Visible = false;
+                authtoken.setToken(token);
+                authtoken.createCookieInContainer();
+                string readouttoken = authtoken.readTokenFromCookie();
+                MessageBox.Show(readouttoken, "Token Obtained and Stored");
+                LoginForm.ActiveForm.Close();
+            }
+            
+        }
+
+        private void passwordOrUserName_KeyDown(object sender, EventArgs e)
+        {
+            loginErrorLabel.Visible = false;
         }
 
         private void InitializePasswordBox()
