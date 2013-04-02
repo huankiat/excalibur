@@ -38,48 +38,41 @@ namespace Excalibur.ExcelClient
             string returnID;
             string token;
 
-            if (AuthToken.cContainer == null)
-            {
-                MessageBox.Show("Please login first");
 
-            }
-            else
+            if (AuthToken.cContainer == null & ch.checkFileID(wb) == "Nil") 
             {
+                MessageBox.Show("Please login and register your workbook.");
+            }
+            else if (AuthToken.cContainer == null)
+            {
+                MessageBox.Show("Please login first.");
+            }
+            else if (ch.checkFileID(wb) == "Nil")
+            {
+                MessageBox.Show("Please register your workbook.");
+            }
+            else     
+            {
+                Excel.Shape aShape;
+                aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
+                                            rng.Top, 3, 3);
+                aShape.Name = "Pub";
+                aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
+                aShape.Fill.Solid();
+                aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+                aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
+                aShape.Placement = Excel.XlPlacement.xlMove;
+
+                int fileID = Convert.ToInt32(ch.checkFileID(wb));
                 token = at.readTokenFromCookie();
+                ch.setAuthToken(token);
 
-
-                if (token == "No cookie detected" | token == "")
-                {
-                    MessageBox.Show("Please login first");
-                }
-                else
-                {
-                    if (ch.checkFileID(wb) == "Nil")
-                    {
-                        MessageBox.Show("Need to register the workbook first", "Alert");
-                    }
-                    else
-                    {
-                        Excel.Shape aShape;
-                        aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
-                                                    rng.Top, 3, 3);
-                        aShape.Name = "Pub";
-                        aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
-                        aShape.Fill.Solid();
-                        aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
-                        aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
-                        aShape.Placement = Excel.XlPlacement.xlMove;
-
-                        int fileID = Convert.ToInt32(ch.checkFileID(wb));
-                        ch.setAuthToken(token);
-                        returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), fileID);
-                        rng.Name = "PUB_" + returnID + "_" + textBox1.Text.ToString();
-                        MessageBox.Show("Published as " + returnID, "Response from Server");
-                    }
-                }
+                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), fileID);
+                rng.Name = "PUB_" + returnID;
+                MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
             }
+              
             PubForm.ActiveForm.Close();
-        
         }
 
         public void mssgCall()

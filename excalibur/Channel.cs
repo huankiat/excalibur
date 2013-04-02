@@ -91,6 +91,29 @@ namespace Excalibur.Models
                 return data;
             }
         }
+
+        public string getChannelDesc(string channelID)
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
+            request.Method = "GET";
+            request.Accept = "application/json";
+            request.ContentType = "application/json";
+
+            WebResponse response = request.GetResponse();
+            using (Stream stream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+                String responseString = reader.ReadToEnd();
+
+                dynamic json = JValue.Parse(responseString);
+                var channel = json.channel;
+                string data = channel.description;
+                reader.Close();
+                response.Close();
+
+                return data;
+            }
+        }
       
         public string publishChannel(string description, string value, int spreadsheet_id)
         {
@@ -136,7 +159,7 @@ namespace Excalibur.Models
 
         }
 
-        public string rePublishChannel(int channelID, string description, int value, int spreadsheet_id, bool to_replace)
+        public string rePublishChannel(int channelID, string description, string value, int spreadsheet_id, bool to_replace)
         {
             var jsonObject = new JObject();
             dynamic datafeed = jsonObject;
@@ -296,8 +319,6 @@ namespace Excalibur.Models
                     string[] splitTxt = partial_name.Split(delim);
                     string cellID = splitTxt[0];
                     int channelID = Convert.ToInt32(cellID);
-                    string cellDesc = splitTxt[1];
-
 
                     if (full_name.Substring(0, 3) == "SUB")
                     {
@@ -311,8 +332,10 @@ namespace Excalibur.Models
                         }
                         else
                         {
-                            int r_value = (int)nRange.RefersToRange.Value;
+                            
+                            string r_value = nRange.RefersToRange.Value.ToString();
                             int fileID = Convert.ToInt32(this.checkFileID(wb));
+                            string cellDesc = this.getChannelDesc(cellID);
                             message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, false);
                             
                         }

@@ -80,16 +80,11 @@ namespace Excalibur.ExcelClient
             string[] channelID = comboBox2.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
 
             dataID = channelID[0];
-            dataName = channelID[1];
             dataValue = ch.getChannelData(dataID);
 
-            rng.Name = "SUB_" + dataID + "_" + dataName;
-
+            rng.Name = "SUB_" + dataID;
             rng.Value = dataValue;
-
-            //Excel.IconSetCondition isc = (Excel.IconSetCondition)rng.FormatConditions.AddIconSetCondition();
-            //isc.ShowIconOnly = true;
-            //isc.IconSet = wb.IconSets[Excel.XlIconSet.xl3Triangles];
+         
 
             SubForm.ActiveForm.Close();
        
