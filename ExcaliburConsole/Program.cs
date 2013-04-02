@@ -15,15 +15,22 @@ namespace ExcaliburConsole
         {
             Channel ch = new Channel();
             AuthToken at = new AuthToken();
-
-            string token = ch.getToken("huankiat@processclick.com","password");
-            Console.Write("Token from Website: " + token + "\n");
-
+            string token = ch.getToken("huankiat@processclick.com", "password");
             at.setToken(token);
             at.createCookieInContainer();
-            string txt = at.readTokenFromCookie();
-            Console.Write("Cookie Token: " + txt + "\n");
+            string ctoken = at.readTokenFromCookie();
+            ch.setAuthToken(ctoken);
+            string response = ch.publishChannel("ConsoleAuth", "123", 12);
+            //string token = ch.getToken("huankiat@processclick.com", "password");
+            //Console.Write("Token from Website: " + token + "\n");
 
+            //at.setToken(token);
+            //at.createCookieInContainer();
+            //string txt = at.readTokenFromCookie();
+            //Console.Write("Cookie Token: " + txt + "\n");
+           
+            
+            Console.Write(response);
 
             Console.Read();
         }

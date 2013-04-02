@@ -12,12 +12,22 @@ namespace Excalibur.ExcelClient
 {
     public partial class LoginForm : Form
     {
+        public AuthToken at;
+
+
         public LoginForm()
         {
             InitializeComponent();
             InitializePasswordBox();
             loginErrorLabel.Visible = false;
+            at = new AuthToken();
         }
+
+        public AuthToken getAuthToken()
+        {
+            return at;
+        }
+
 
         private void loginButton_Click(object sender, EventArgs e)
         {
@@ -37,6 +47,7 @@ namespace Excalibur.ExcelClient
                 loginErrorLabel.Visible = false;
                 authtoken.setToken(token);
                 authtoken.createCookieInContainer();
+                at = authtoken;
                 string readouttoken = authtoken.readTokenFromCookie();
                 MessageBox.Show(readouttoken, "Token Obtained and Stored");
                 LoginForm.ActiveForm.Close();

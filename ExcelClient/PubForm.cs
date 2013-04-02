@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Excalibur.Models;
+using VBIDE = Microsoft.Vbe.Interop;
 
 namespace Excalibur.ExcelClient
 {
@@ -21,6 +22,7 @@ namespace Excalibur.ExcelClient
         public PubForm()
         {
             InitializeComponent();
+            //ThisAddIn.AddMacro();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -29,31 +31,64 @@ namespace Excalibur.ExcelClient
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
+           
  
             Channel ch = new Channel();
+            AuthToken at = new AuthToken();
             string returnID;
-            Excel.IconSetCondition isc = (Excel.IconSetCondition)rng.FormatConditions.AddIconSetCondition();
-            isc.ShowIconOnly = true;
-            isc.IconSet = wb.IconSets[Excel.XlIconSet.xl3Triangles];
-            isc.IconCriteria[2].Type = Excel.XlConditionValueTypes.xlConditionValueNumber;
-            isc.IconCriteria[2].Value = 0;
-            isc.IconCriteria[2].Operator = (int)(Excel.XlFormatConditionOperator.xlNotEqual);
+            string token;
 
-            if (ch.checkFileID(wb) == "Nil")
+            if (AuthToken.cContainer == null)
             {
-                MessageBox.Show("Need to register the workbook first", "Alert");
+                MessageBox.Show("Please login first");
+
             }
             else
             {
-                int fileID = Convert.ToInt32(ch.checkFileID(wb));
-                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), fileID);
-                rng.Name = "PUB_" + returnID + "_" + textBox1.Text.ToString();
-                MessageBox.Show("Published as " + returnID, "Response from Server");
+                token = at.readTokenFromCookie();
+
+
+                if (token == "No cookie detected" | token == "")
+                {
+                    MessageBox.Show("Please login first");
+                }
+                else
+                {
+                    if (ch.checkFileID(wb) == "Nil")
+                    {
+                        MessageBox.Show("Need to register the workbook first", "Alert");
+                    }
+                    else
+                    {
+                        Excel.Shape aShape;
+                        aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
+                                                    rng.Top, 3, 3);
+                        aShape.Name = "Pub";
+                        aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
+                        aShape.Fill.Solid();
+                        aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+                        aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
+                        aShape.Placement = Excel.XlPlacement.xlMove;
+
+                        int fileID = Convert.ToInt32(ch.checkFileID(wb));
+                        ch.setAuthToken(token);
+                        returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), fileID);
+                        rng.Name = "PUB_" + returnID + "_" + textBox1.Text.ToString();
+                        MessageBox.Show("Published as " + returnID, "Response from Server");
+                    }
+                }
             }
             PubForm.ActiveForm.Close();
         
         }
 
+        public void mssgCall()
+        {
+            MessageBox.Show("Publish");
+        }
+
 
     }
+    
+
 }

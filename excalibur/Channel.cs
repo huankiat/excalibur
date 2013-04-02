@@ -19,11 +19,30 @@ namespace Excalibur.Models
     {
 
         private string getChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
-        private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels/create_and_publish.json";
+        private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
         private string channelDataURL = "http://panoply-staging.herokuapp.com/api/channels/";
         private string fileIDURL = "http://panoply-staging.herokuapp.com/api/spreadsheets.json";
         private string rePubURL = "http://panoply-staging.herokuapp.com/api/channels/";
         private string tokenURL = "http://panoply-staging.herokuapp.com/api/tokens.json";
+        private string authToken = "";
+
+        public void setAuthToken(string token)
+        {
+            authToken = token;
+        }
+
+        public string getChannelToken()
+        {
+            if (authToken == "")
+            {
+                return "No Token Assigned";
+            }
+            else
+            {
+                return authToken;
+            }
+        }
+
 
         public JArray getAllChannels()
         {
@@ -82,9 +101,10 @@ namespace Excalibur.Models
             dynamic data = new JObject();
             data.description = description;
             data.value = value;
+            data.spreadsheet_id = spreadsheet_id;
 
             datafeed.channel = data;
-            datafeed.spreadsheet_id = spreadsheet_id;
+         
 
             byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
@@ -92,7 +112,9 @@ namespace Excalibur.Models
             request.Method = "POST";
             request.Accept = "application/json";
             request.ContentType = "application/json";
+            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
             request.ContentLength = byteArray.Length;
+            Console.Write(request.Headers.AllKeys.ToString());
 
             Stream dataStream = request.GetRequestStream();
             dataStream.Write(byteArray, 0, byteArray.Length);
@@ -109,7 +131,7 @@ namespace Excalibur.Models
             reader.Close();
             response.Close();
 
-            return responseFromServer;
+            return returnID;
             
 
         }
@@ -328,7 +350,7 @@ namespace Excalibur.Models
     {
         private string authToken;
         private Cookie excaliburCookie;
-        private CookieContainer cContainer;
+        public static CookieContainer cContainer;
         private Uri cURI;
 
         public AuthToken()
@@ -362,27 +384,32 @@ namespace Excalibur.Models
             c.Name = "ExcaliburToken";
             cc.Add(cURI, c);
             excaliburCookie = c;
-            cContainer = cc;
+            AuthToken.cContainer = cc;
         }
 
         public string readTokenFromCookie()
         {
-            string token;
+            string token = "X";
             CookieCollection cookies = new CookieCollection();
 
-            cookies = cContainer.GetCookies(cURI);
-            token = "No cookie detected";
+            cookies = AuthToken.cContainer.GetCookies(cURI);
 
-            for (int i=0; i<cookies.Count; i++) 
+            if (cookies.Count == 0)
             {
-                Cookie c = cookies[i];
-                if (c.Name == "ExcaliburToken")
-                {
-                    token = c.Value;
-                }
-
+                token = "No cookie detected";
             }
+            else
+            {
+                for (int i = 0; i < cookies.Count; i++)
+                {
+                    Cookie c = cookies[i];
+                    if (c.Name == "ExcaliburToken")
+                    {
+                        token = c.Value;
+                    }
 
+                }
+            }
             return token;
         }
 

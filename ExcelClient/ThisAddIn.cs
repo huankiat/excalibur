@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Excel;
+using VBIDE = Microsoft.Vbe.Interop;
 using System.Net;
 using System.Web;
 using Newtonsoft.Json;
@@ -21,10 +22,30 @@ namespace Excalibur.ExcelClient
         Office.CommandBarButton subButton;
         Office.CommandBarButton pubButton;
         Office.CommandBarButton refreshButton;
+            
         
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             this.AddContextMenu();
+            //this.AddMacro();
+        }
+
+        public static void AddMacro()
+        {
+            Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
+            Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
+            VBIDE.VBComponent oModule;
+
+            //Create Micro in Excel
+            string sCode = "sub mssgCall()\r\n" +
+                            "  msgbox \"Publish to ProcessClick\"\r\n" +
+                            "end sub";
+            
+            oModule = wb.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
+         
+            oModule.CodeModule.AddFromString(sCode);
+            wb.Save();
+            MessageBox.Show(sCode);
 
         }
 
