@@ -21,9 +21,9 @@ namespace Excalibur.ExcelClient
 
         string currentValue;
         string currentFormula;
-        string dataID;
-        string dataName;
-        string dataValue;
+        string channelID;
+        string channelName;
+        string channelValue;
         Channel ch;
         
         public SubForm()
@@ -62,11 +62,11 @@ namespace Excalibur.ExcelClient
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
 
             
-            string[] channelID = comboBox2.SelectedItem.ToString().Split(new string[] {"-"}, StringSplitOptions.None);
+            string[] nameArray = comboBox2.SelectedItem.ToString().Split(new string[] {"-"}, StringSplitOptions.None);
             
-            dataID = channelID[0];
-            dataName = channelID[1];
-            dataValue = ch.getChannelData(dataID);
+            channelID = nameArray[0];
+            channelName = nameArray[1];
+            channelValue = ch.getChannelData(channelID);
 
         }
 
@@ -77,13 +77,13 @@ namespace Excalibur.ExcelClient
             Excel._Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
 
-            string[] channelID = comboBox2.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
+            string[] nameArray = comboBox2.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
 
-            dataID = channelID[0];
-            dataValue = ch.getChannelData(dataID);
+            channelID = nameArray[0];
+            channelValue = ch.getChannelData(channelID);
 
-            rng.Name = "SUB_" + dataID;
-            rng.Value = dataValue;
+            rng.Name = "SUB_" + channelID;
+            rng.Value = channelValue;
          
 
             SubForm.ActiveForm.Close();
@@ -109,7 +109,7 @@ namespace Excalibur.ExcelClient
                 }
 
             }
-            rng.Value = dataValue;
+            rng.Value = channelValue;
 
         }
 

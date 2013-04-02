@@ -39,7 +39,7 @@ namespace Excalibur.ExcelClient
             string token;
 
 
-            if (AuthToken.cContainer == null & ch.checkFileID(wb) == "Nil") 
+            if (AuthToken.cContainer == null & ch.checkSpreadSheetID(wb) == "Nil") 
             {
                 MessageBox.Show("Please login and register your workbook.");
             }
@@ -47,7 +47,7 @@ namespace Excalibur.ExcelClient
             {
                 MessageBox.Show("Please login first.");
             }
-            else if (ch.checkFileID(wb) == "Nil")
+            else if (ch.checkSpreadSheetID(wb) == "Nil")
             {
                 MessageBox.Show("Please register your workbook.");
             }
@@ -63,11 +63,11 @@ namespace Excalibur.ExcelClient
                 aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
                 aShape.Placement = Excel.XlPlacement.xlMove;
 
-                int fileID = Convert.ToInt32(ch.checkFileID(wb));
+                int spreadSheetID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
                 token = at.readTokenFromCookie();
                 ch.setAuthToken(token);
 
-                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), fileID);
+                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), spreadSheetID);
                 rng.Name = "PUB_" + returnID;
                 MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
             }

@@ -112,9 +112,9 @@ namespace Excalibur.ExcelClient
             properties = (Office.DocumentProperties)wb.CustomDocumentProperties;
 
             Channel ch = new Channel();
-            if (ch.checkFileID(wb) == "Nil")
+            if (ch.checkSpreadSheetID(wb) == "Nil")
             {
-                string fileID = ch.getFileID(filename);
+                string fileID = ch.getSpreadSheetID(filename);
                 MessageBox.Show(fileID, "File ID");
 
                 properties.Add("Excalibur ID", false,
@@ -122,7 +122,7 @@ namespace Excalibur.ExcelClient
             }
             else
             {
-                MessageBox.Show("ID Exists - Excalibur ID: " + ch.checkFileID(wb), "File Already Registered");
+                MessageBox.Show("ID Exists - Excalibur ID: " + ch.checkSpreadSheetID(wb), "File Already Registered");
             }
 
         }

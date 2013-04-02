@@ -18,6 +18,7 @@ namespace Excalibur.Models
     public class Channel
     {
 
+        //All available channel endpoints
         private string getChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
         private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
         private string channelDataURL = "http://panoply-staging.herokuapp.com/api/channels/";
@@ -25,6 +26,7 @@ namespace Excalibur.Models
         private string rePubURL = "http://panoply-staging.herokuapp.com/api/channels/";
         private string tokenURL = "http://panoply-staging.herokuapp.com/api/tokens.json";
         private string authToken = "";
+        private dynamic channelJson;
 
         public void setAuthToken(string token)
         {
@@ -42,7 +44,6 @@ namespace Excalibur.Models
                 return authToken;
             }
         }
-
 
         public JArray getAllChannels()
         {
@@ -69,7 +70,7 @@ namespace Excalibur.Models
             
         }
 
-        public string getChannelData(string channelID)
+        private void getChannelJson(string channelID)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
             request.Method = "GET";
@@ -81,38 +82,38 @@ namespace Excalibur.Models
             {
                 StreamReader reader = new StreamReader(stream, Encoding.UTF8);
                 String responseString = reader.ReadToEnd();
-
                 dynamic json = JValue.Parse(responseString);
-                var channel = json.channel;
-                string data = channel.value;
+
+                channelJson = json;
                 reader.Close();
                 response.Close();
-
-                return data;
             }
+        }
+
+        public string getChannelData(string channelID)
+        {
+            if (channelJson == null)
+            {
+                getChannelJson(channelID);
+            }
+
+            var channel = channelJson.channel;
+            string data = channel.value;
+            return data;
+
         }
 
         public string getChannelDesc(string channelID)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
-            request.Method = "GET";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-
-            WebResponse response = request.GetResponse();
-            using (Stream stream = response.GetResponseStream())
+            if (channelJson == null)
             {
-                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-                String responseString = reader.ReadToEnd();
-
-                dynamic json = JValue.Parse(responseString);
-                var channel = json.channel;
-                string data = channel.description;
-                reader.Close();
-                response.Close();
-
-                return data;
+                getChannelJson(channelID);
             }
+
+            var channel = channelJson.channel;
+            string data = channel.description;
+            return data;
+
         }
       
         public string publishChannel(string description, string value, int spreadsheet_id)
@@ -200,7 +201,7 @@ namespace Excalibur.Models
 
         }
 
-        public string getFileID(string filename)
+        public string getSpreadSheetID(string filename)
         {
             var jsonObject = new JObject();
             dynamic datafeed = jsonObject;
@@ -239,7 +240,7 @@ namespace Excalibur.Models
             return fileID;
         }
 
-        public string checkFileID(Excel.Workbook wb)
+        public string checkSpreadSheetID(Excel.Workbook wb)
         {
             string propertyName = "Excalibur ID";
             Office.DocumentProperties properties;
@@ -326,7 +327,7 @@ namespace Excalibur.Models
                     }
                     else
                     {
-                        if (this.checkFileID(wb) == "Nil")
+                        if (this.checkSpreadSheetID(wb) == "Nil")
                         {
                             message = "You need to register this workbook";
                         }
@@ -334,7 +335,7 @@ namespace Excalibur.Models
                         {
                             
                             string r_value = nRange.RefersToRange.Value.ToString();
-                            int fileID = Convert.ToInt32(this.checkFileID(wb));
+                            int fileID = Convert.ToInt32(this.checkSpreadSheetID(wb));
                             string cellDesc = this.getChannelDesc(cellID);
                             message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, false);
                             
