@@ -50,7 +50,10 @@ namespace Excalibur.ExcelClient
                 at = authtoken;
                 string readouttoken = authtoken.readTokenFromCookie();
                 MessageBox.Show(readouttoken, "Token Obtained and Stored");
+                Properties.Settings.Default.Token = readouttoken;
+                Properties.Settings.Default.Save();
                 LoginForm.ActiveForm.Close();
+                MessageBox.Show(Properties.Settings.Default.Token, "Token Obtained and Stored");
             }
             
         }

@@ -37,22 +37,22 @@ namespace Excalibur.ExcelClient
             AuthToken at = new AuthToken();
             string returnID;
             string token;
+            token = Properties.Settings.Default.Token;
 
-
-            if (AuthToken.cContainer == null & ch.checkSpreadSheetID(wb) == "Nil") 
-            {
-                MessageBox.Show("Please login and register your workbook.");
-            }
-            else if (AuthToken.cContainer == null)
-            {
-                MessageBox.Show("Please login first.");
-            }
-            else if (ch.checkSpreadSheetID(wb) == "Nil")
-            {
-                MessageBox.Show("Please register your workbook.");
-            }
-            else     
-            {
+            //if (AuthToken.cContainer == null & ch.checkSpreadSheetID(wb) == "Nil")
+            //{
+            //    MessageBox.Show("Please login and register your workbook.");
+            //}
+            //else if (AuthToken.cContainer == null)
+            //{
+            //    MessageBox.Show("Please login first.");
+            //}
+            //else if (ch.checkSpreadSheetID(wb) == "Nil")
+            //{
+            //    MessageBox.Show("Please register your workbook.");
+            //}
+            //if (token != "")     
+            //{
                 Excel.Shape aShape;
                 aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
                                             rng.Top, 3, 3);
@@ -64,13 +64,14 @@ namespace Excalibur.ExcelClient
                 aShape.Placement = Excel.XlPlacement.xlMove;
 
                 int spreadSheetID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
-                token = at.readTokenFromCookie();
+                //token = at.readTokenFromCookie();
+                //token = Properties.Settings.Default.Token;
                 ch.setAuthToken(token);
 
                 returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), spreadSheetID);
                 rng.Name = "PUB_" + returnID;
                 MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
-            }
+            //}
               
             PubForm.ActiveForm.Close();
         }
