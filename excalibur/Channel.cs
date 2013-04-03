@@ -411,7 +411,8 @@ namespace Excalibur.Models
             AuthToken.cContainer = cc;
         }
 
-        public string readTokenFromCookie()
+
+        public string readTokenFromStore()
         {
             string token = "X";
             CookieCollection cookies = new CookieCollection();

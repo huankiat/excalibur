@@ -18,7 +18,7 @@ namespace ExcaliburConsole
             string token = ch.getToken("huankiat@processclick.com", "password");
             at.setToken(token);
             at.createCookieInContainer();
-            string ctoken = at.readTokenFromCookie();
+            string ctoken = at.readTokenFromStore();
             ch.setAuthToken(ctoken);
             string response = ch.publishChannel("ConsoleAuth", "123", 12);
             //string token = ch.getToken("huankiat@processclick.com", "password");

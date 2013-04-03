@@ -30,24 +30,7 @@ namespace Excalibur.ExcelClient
             //this.AddMacro();
         }
 
-        public static void AddMacro()
-        {
-            Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
-            Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
-            VBIDE.VBComponent oModule;
 
-            //Create Micro in Excel
-            string sCode = "sub mssgCall()\r\n" +
-                            "  msgbox \"Publish to ProcessClick\"\r\n" +
-                            "end sub";
-            
-            oModule = wb.VBProject.VBComponents.Add(VBIDE.vbext_ComponentType.vbext_ct_StdModule);
-         
-            oModule.CodeModule.AddFromString(sCode);
-            wb.Save();
-            MessageBox.Show(sCode);
-
-        }
 
         public void AddContextMenu()
         {
@@ -119,6 +102,49 @@ namespace Excalibur.ExcelClient
         protected override Microsoft.Office.Core.IRibbonExtensibility CreateRibbonExtensibilityObject()
         {
             return new ExcaliburRibbon();
+        }
+
+    }
+
+    public static class TokenStore
+    {
+        private static int daysToExpire = 15; //15 days for token to expire
+
+        public static void addTokenToStore(string token)
+        {
+            if (Properties.Settings.Default.Token == "")
+            {
+                Properties.Settings.Default.Token = token;
+                Properties.Settings.Default.TokenDate = DateTime.Today;
+                Properties.Settings.Default.Save();
+            }
+
+        }
+
+        public static bool checkTokenInStore()
+        {
+            bool is_TokenInStore;
+
+            if (Properties.Settings.Default.Token != "")
+            {
+                is_TokenInStore = true;
+            }
+            else
+            {
+                is_TokenInStore = false;
+            }
+            return is_TokenInStore;
+        }
+
+        public static void checkTokenExpiry()
+        {
+            DateTime tokenDate;
+            tokenDate = Properties.Settings.Default.TokenDate;
+            if (DateTime.Today >= tokenDate.AddDays(daysToExpire))
+            {
+                Properties.Settings.Default.Token = "";
+                Properties.Settings.Default.Save();
+            }
         }
 
     }
