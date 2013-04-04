@@ -40,7 +40,8 @@ namespace Excalibur.ExcelClient
         private void InitializeComboBox()
         {
 
-            JArray datafeed = ch.getAllChannels();
+            JArray d = ch.getAllChannels();
+            JArray datafeed = ch.filterPermittedChannels(1, d);
             if (datafeed.ToString() != "[]")
             {
                 foreach (dynamic data in datafeed)

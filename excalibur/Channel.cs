@@ -70,7 +70,25 @@ namespace Excalibur.Models
             
         }
 
-        private void getChannelJson(string channelID)
+        public JArray filterPermittedChannels(int userID, JArray datafeed)
+        {
+            JArray filteredDataFeed = new JArray();
+            foreach (JObject json in datafeed)
+            {
+                dynamic j = new JObject();
+                j = json;
+                if ((j.owner_id == userID) | (j.assignee_id == userID))
+                {
+                    filteredDataFeed.Add(json);
+                }
+            }
+
+            return filteredDataFeed;
+            
+
+        }
+
+        public void getChannelJson(string channelID)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
             request.Method = "GET";
@@ -100,7 +118,6 @@ namespace Excalibur.Models
             var channel = channelJson.channel;
             string data = channel.value;
             return data;
-
         }
 
         public string getChannelDesc(string channelID)
@@ -114,6 +131,36 @@ namespace Excalibur.Models
             string data = channel.description;
             return data;
 
+        }
+
+        public int[] getAssigneeIDs(string channelID)
+        {
+            if (channelJson == null)
+            {
+                getChannelJson(channelID);
+            }
+            
+            var channel = channelJson.channel;
+            List<int> assignee_id = new List<int>();
+            JArray idArray = channel.assignee_id;
+
+            foreach (dynamic j in idArray)
+            {
+                assignee_id.Add(j);
+            }
+            return assignee_id.ToArray();
+        }
+
+        public int getOwnerID(string channelID)
+        {
+            if (channelJson == null)
+            {
+                getChannelJson(channelID);
+            }
+            
+            var channel = channelJson.channel;
+            int data = channel.owner_id;
+            return data;
         }
       
         public string publishChannel(string description, string value, int spreadsheet_id)
@@ -346,11 +393,9 @@ namespace Excalibur.Models
             return message;
         }
 
-
-
     }
 
-    public class ExcelRange
+    public class ExcelOps
     {
      
         public string cellName { get; set; }

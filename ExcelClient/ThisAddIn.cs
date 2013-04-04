@@ -27,6 +27,7 @@ namespace Excalibur.ExcelClient
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             this.AddContextMenu();
+            
             //this.AddMacro();
         }
 
