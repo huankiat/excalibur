@@ -88,6 +88,10 @@ namespace Excalibur.Models
 
         }
 
+        /// <summary>
+        /// get json for a single channel, include id, description, value, spreadsheet_id, owner_id, assignee_id
+        /// </summary>
+        /// <param name="channelID"></param>
         public void getChannelJson(string channelID)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
@@ -108,6 +112,8 @@ namespace Excalibur.Models
             }
         }
 
+        //get channel data from getChannelJson(channelID). 
+        //If getChannelJson has not been called yet, call getChannelJson.
         public string getChannelData(string channelID)
         {
             if (channelJson == null)
@@ -120,6 +126,7 @@ namespace Excalibur.Models
             return data;
         }
 
+        //get channel description
         public string getChannelDesc(string channelID)
         {
             if (channelJson == null)
@@ -133,6 +140,7 @@ namespace Excalibur.Models
 
         }
 
+        //get AssigneeIDs for a channel as int[]
         public int[] getAssigneeIDs(string channelID)
         {
             if (channelJson == null)
@@ -151,6 +159,7 @@ namespace Excalibur.Models
             return assignee_id.ToArray();
         }
 
+        //get Owner ID for a channel
         public int getOwnerID(string channelID)
         {
             if (channelJson == null)
@@ -162,45 +171,76 @@ namespace Excalibur.Models
             int data = channel.owner_id;
             return data;
         }
-      
+
+        //get spreadsheetID for a channel
+        public int getSpreadSheetID(string channelID)
+        {
+            if (channelJson == null)
+            {
+                getChannelJson(channelID);
+            }
+
+            var channel = channelJson.channel;
+            int data = channel.spreadsheet_id;
+            return data;
+        }
+        
+
+        /// <summary>
+        /// Publish to a secured channel. Must call setAuthToken(string token) \
+        /// first or else return error code 'no_token'
+        /// </summary>
+        /// <param name="description">channel description</param>
+        /// <param name="value">channel value</param>
+        /// <param name="spreadsheet_id">spreadsheet_id</param>
+        /// <returns>channel ID if successful</returns>
         public string publishChannel(string description, string value, int spreadsheet_id)
         {
-            var jsonObject = new JObject();
-            dynamic datafeed = jsonObject;
-            datafeed.channel = new JObject();
+            string returnID;
 
-            dynamic data = new JObject();
-            data.description = description;
-            data.value = value;
-            data.spreadsheet_id = spreadsheet_id;
+            if (authToken != "")
+            {
+                var jsonObject = new JObject();
+                dynamic datafeed = jsonObject;
+                datafeed.channel = new JObject();
 
-            datafeed.channel = data;
-         
+                dynamic data = new JObject();
+                data.description = description;
+                data.value = value;
+                data.spreadsheet_id = spreadsheet_id;
 
-            byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
+                datafeed.channel = data;
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postChannelURL);
-            request.Method = "POST";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
-            request.ContentLength = byteArray.Length;
-            Console.Write(request.Headers.AllKeys.ToString());
 
-            Stream dataStream = request.GetRequestStream();
-            dataStream.Write(byteArray, 0, byteArray.Length);
-            dataStream.Close();
+                byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
-            //receive response
-            WebResponse response = request.GetResponse();
-            dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postChannelURL);
+                request.Method = "POST";
+                request.Accept = "application/json";
+                request.ContentType = "application/json";
+                request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
+                request.ContentLength = byteArray.Length;
+                Console.Write(request.Headers.AllKeys.ToString());
 
-            string responseFromServer = reader.ReadToEnd();
-            dynamic json = JValue.Parse(responseFromServer);
-            string returnID = json.id;
-            reader.Close();
-            response.Close();
+                Stream dataStream = request.GetRequestStream();
+                dataStream.Write(byteArray, 0, byteArray.Length);
+                dataStream.Close();
+
+                //receive response
+                WebResponse response = request.GetResponse();
+                dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+
+                string responseFromServer = reader.ReadToEnd();
+                dynamic json = JValue.Parse(responseFromServer);
+                returnID = json.id;
+                reader.Close();
+                response.Close();
+            }
+            else
+            {
+                returnID = "no_token";
+            }
 
             return returnID;
             
