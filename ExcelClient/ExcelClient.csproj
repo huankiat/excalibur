@@ -189,6 +189,12 @@
     <Compile Include="LoginForm.Designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="RePubForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RePubForm.Designer.cs">
+      <DependentUpon>RePubForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="SubForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -206,6 +212,9 @@
     </Compile>
     <EmbeddedResource Include="LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RePubForm.resx">
+      <DependentUpon>RePubForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SubForm.resx">
       <DependentUpon>SubForm.cs</DependentUpon>

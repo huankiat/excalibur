@@ -32,27 +32,32 @@ namespace Excalibur.ExcelClient
             Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
            
- 
             Channel ch = new Channel();
-            AuthToken at = new AuthToken();
             string returnID;
             string token;
-            token = Properties.Settings.Default.Token;
+            int ssID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
 
-            //if (AuthToken.cContainer == null & ch.checkSpreadSheetID(wb) == "Nil")
-            //{
-            //    MessageBox.Show("Please login and register your workbook.");
-            //}
-            //else if (AuthToken.cContainer == null)
-            //{
-            //    MessageBox.Show("Please login first.");
-            //}
-            //else if (ch.checkSpreadSheetID(wb) == "Nil")
-            //{
-            //    MessageBox.Show("Please register your workbook.");
-            //}
-            //if (token != "")     
-            //{
+            if (ssID == 0)
+            {
+                ch.getSpreadSheetID(wb.Name.ToString());
+            }
+            
+
+            if (!TokenStore.checkTokenInStore())
+            {
+                MessageBox.Show("Please log in first");
+            }
+            else
+            {
+                //get token and send token together with publication request
+                int spreadSheetID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
+                token = TokenStore.getTokenFromStore();
+                ch.setAuthToken(token);
+                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), spreadSheetID);
+                rng.Name = "PUB_" + returnID;
+                MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
+
+                //Add indicator to show publication status
                 Excel.Shape aShape;
                 aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
                                             rng.Top, 3, 3);
@@ -63,15 +68,7 @@ namespace Excalibur.ExcelClient
                 aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
                 aShape.Placement = Excel.XlPlacement.xlMove;
 
-                int spreadSheetID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
-                //token = at.readTokenFromCookie();
-                //token = Properties.Settings.Default.Token;
-                ch.setAuthToken(token);
-
-                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), spreadSheetID);
-                rng.Name = "PUB_" + returnID;
-                MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
-            //}
+            }
               
             PubForm.ActiveForm.Close();
         }

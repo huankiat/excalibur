@@ -14,6 +14,11 @@
                   size="large" imageMso ="GoToNewRecord"
             screentip="Send data" onAction="OnPubButton"
             supertip="Send data to channel"/>
+
+          <button id="rePublishButton" label="Re-Publish"
+                  size="large" imageMso ="GoToNewRecord"
+            screentip="Modify channel" onAction="OnRePubButton"
+            supertip="Modify default wb, data and description of a channel"/>
     
             <button id="republishButton" label="Refresh"
                     size ="large" imageMso ="DatabaseLinedTableManager"

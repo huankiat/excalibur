@@ -102,6 +102,13 @@ namespace Excalibur.ExcelClient
 
         }
 
+        public void onRePubButton(Office.IRibbonControl control)
+        {
+            RePubForm frm = new RePubForm();
+            frm.Show();
+        }
+
+
         public void onRegButton(Office.IRibbonControl control)
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
@@ -126,6 +133,8 @@ namespace Excalibur.ExcelClient
             }
 
         }
+
+
 
         public void onRefreshButton(Office.IRibbonControl control)
         {

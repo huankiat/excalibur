@@ -173,7 +173,7 @@ namespace Excalibur.Models
         }
 
         //get spreadsheetID for a channel
-        public int getSpreadSheetID(string channelID)
+        public int getChannelSpreadSheetID(string channelID)
         {
             if (channelJson == null)
             {
@@ -340,7 +340,7 @@ namespace Excalibur.Models
                     return prop.Value.ToString();
                 }
             }
-            return "Nil";
+            return "0";
             
         }
 

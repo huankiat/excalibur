@@ -122,6 +122,16 @@ namespace Excalibur.ExcelClient
 
         }
 
+        public static string getTokenFromStore()
+        {
+            return Properties.Settings.Default.Token;
+        }
+
+        public static DateTime getTokenDateFromStore()
+        {
+            return Properties.Settings.Default.TokenDate;
+        }
+
         public static bool checkTokenInStore()
         {
             bool is_TokenInStore;
