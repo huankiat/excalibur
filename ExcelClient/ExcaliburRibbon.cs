@@ -119,8 +119,11 @@ namespace Excalibur.ExcelClient
             properties = (Office.DocumentProperties)wb.CustomDocumentProperties;
 
             Channel ch = new Channel();
-            if (ch.checkSpreadSheetID(wb) == "Nil")
+            ch.setAuthToken(TokenStore.getTokenFromStore());
+
+            if (ch.checkSpreadSheetID(wb) == "0")
             {
+            
                 string fileID = ch.getSpreadSheetID(filename);
                 MessageBox.Show(fileID, "File ID");
 

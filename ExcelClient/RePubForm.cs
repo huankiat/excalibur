@@ -22,7 +22,7 @@ namespace Excalibur.ExcelClient
         {           
             InitializeComponent();
             InitializePubComboBox();
-            //checkSSID();
+            checkSSID();
         }
 
         private void checkSSID()
@@ -30,6 +30,7 @@ namespace Excalibur.ExcelClient
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Channel ch = new Channel();
+            ch.setAuthToken(TokenStore.getTokenFromStore());
 
             if (ch.checkSpreadSheetID(wb) == "0")
             {
@@ -46,7 +47,9 @@ namespace Excalibur.ExcelClient
 
         private void InitializePubComboBox()
         {
-            Channel ch = new Channel();
+            Channel ch = new Channel();      
+            string token = TokenStore.getTokenFromStore();
+            ch.setAuthToken(token);
             JArray d = ch.getAllChannels();
 
             //Need User ID to send into filterPermittedChannels
@@ -75,6 +78,7 @@ namespace Excalibur.ExcelClient
         private void updateChannelDescription(object sender, EventArgs e)
         {
             Channel ch = new Channel();
+            this.readSelectedChannel();
             descriptionTextBox.Text = ch.getChannelDesc(channelSelected.ToString());
         }
 
@@ -85,10 +89,24 @@ namespace Excalibur.ExcelClient
             Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
             Channel ch = new Channel();
+            this.readSelectedChannel();
+            ch.setAuthToken(TokenStore.getTokenFromStore());
 
             ch.rePublishChannel(channelSelected, descriptionTextBox.Text, rng.Value.ToString(),
                 spreadSheetID, forceCheckBox.Checked);
             rng.Name = "PUB_" + channelSelected.ToString();
+
+            //Add indicator to show publication status
+            Excel.Shape aShape;
+            aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
+                                        rng.Top, 3, 3);
+            aShape.Name = "Pub";
+            aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
+            aShape.Fill.Solid();
+            aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+            aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
+            aShape.Placement = Excel.XlPlacement.xlMove;
+
             RePubForm.ActiveForm.Close();
         }
 

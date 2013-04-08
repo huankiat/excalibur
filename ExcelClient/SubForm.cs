@@ -40,6 +40,7 @@ namespace Excalibur.ExcelClient
         private void InitializeComboBox()
         {
 
+            ch.setAuthToken(Properties.Settings.Default.Token.ToString());
             JArray d = ch.getAllChannels();
             JArray datafeed = ch.filterPermittedChannels(1, d);
             if (datafeed.ToString() != "[]")
@@ -85,6 +86,17 @@ namespace Excalibur.ExcelClient
 
             rng.Name = "SUB_" + channelID;
             rng.Value = channelValue;
+
+            //Add indicator to show subscription status
+            Excel.Shape aShape;
+            aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
+                                        rng.Top, 3, 3);
+            aShape.Name = "Sub";
+            aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
+            aShape.Fill.Solid();
+            aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+            aShape.Fill.ForeColor.RGB = Color.FromArgb(90, 90, 200).ToArgb();
+            aShape.Placement = Excel.XlPlacement.xlMove;
          
 
             SubForm.ActiveForm.Close();

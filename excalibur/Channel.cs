@@ -51,7 +51,7 @@ namespace Excalibur.Models
             request.Method = "GET";
             request.Accept = "application/json";
             request.ContentType = "application/json";
-
+            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
 
             WebResponse response = request.GetResponse();
             using (Stream stream = response.GetResponseStream())
@@ -260,7 +260,7 @@ namespace Excalibur.Models
             data.spreadsheet_id = spreadsheet_id;
 
             datafeed.channel = data;
-            datafeed.forced = to_replace;
+            datafeed.force = to_replace.ToString();
 
             byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
@@ -269,6 +269,7 @@ namespace Excalibur.Models
             request.Accept = "application/json";
             request.ContentType = "application/json";
             request.ContentLength = byteArray.Length;
+            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
 
             Stream dataStream = request.GetRequestStream();
             dataStream.Write(byteArray, 0, byteArray.Length);
@@ -305,6 +306,7 @@ namespace Excalibur.Models
             request.Accept = "application/json";
             request.ContentType = "application/json";
             request.ContentLength = byteArray.Length;
+            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
 
             Stream dataStream = request.GetRequestStream();
             dataStream.Write(byteArray, 0, byteArray.Length);

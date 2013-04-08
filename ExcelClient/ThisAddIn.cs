@@ -14,6 +14,7 @@ using System.Web;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Excalibur.Models;
+using Microsoft.Win32;
 
 namespace Excalibur.ExcelClient
 {
@@ -124,7 +125,10 @@ namespace Excalibur.ExcelClient
 
         public static string getTokenFromStore()
         {
-            return Properties.Settings.Default.Token;
+            RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", false);
+            string myValue = (string)myKey.GetValue("Token");
+            
+            return myValue;
         }
 
         public static DateTime getTokenDateFromStore()
