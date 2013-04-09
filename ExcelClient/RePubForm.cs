@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Excalibur.Models;
+using Office = Microsoft.Office.Core;
 
 namespace Excalibur.ExcelClient
 {
@@ -36,11 +37,19 @@ namespace Excalibur.ExcelClient
             {
                 string id = ch.getSpreadSheetID(wb.Name.ToString());
                 spreadSheetID = Convert.ToInt32(id);
+
+                //write to wb property when a new ID is obtained
+                Microsoft.Office.Core.DocumentProperties properties;
+                properties = (Office.DocumentProperties)wb.CustomDocumentProperties;
+
+                properties.Add("Excalibur ID", false,
+                   Microsoft.Office.Core.MsoDocProperties.msoPropertyTypeString, id);
             }
             else
             {
                 string id = ch.checkSpreadSheetID(wb);
                 spreadSheetID = Convert.ToInt32(id);
+                
             }
         }
 

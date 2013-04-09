@@ -144,11 +144,10 @@ namespace Excalibur.ExcelClient
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Channel ch = new Channel();
+            ch.setAuthToken(TokenStore.getTokenFromStore());
             
             string txt = ch.channelsRefresh(wb);
             MessageBox.Show(txt, "Refresh");
-           
-
         }
 
         public void onLoginButton(Office.IRibbonControl control)

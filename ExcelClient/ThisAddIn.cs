@@ -23,13 +23,13 @@ namespace Excalibur.ExcelClient
         Office.CommandBarButton subButton;
         Office.CommandBarButton pubButton;
         Office.CommandBarButton refreshButton;
+        Office.CommandBarButton rePubButton;
             
         
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             this.AddContextMenu();
             
-            //this.AddMacro();
         }
 
 
@@ -51,6 +51,12 @@ namespace Excalibur.ExcelClient
             pubButton.Tag = "pubButton";
             pubButton.Click += new Office._CommandBarButtonEvents_ClickEventHandler(showPubForm);
 
+            //rePublish button 
+            rePubButton = (Office.CommandBarButton)cellbar.Controls.Add();
+            rePubButton.Caption = "RePublish";
+            rePubButton.Tag = "rePubButton";
+            rePubButton.Click += new Office._CommandBarButtonEvents_ClickEventHandler(showRePubForm);
+
             //refresh button 
             refreshButton = (Office.CommandBarButton)cellbar.Controls.Add();
             refreshButton.Caption = "Refresh";
@@ -68,6 +74,12 @@ namespace Excalibur.ExcelClient
         {
             PubForm frm2 = new PubForm();
             frm2.Show();       
+        }
+
+        private void showRePubForm(Office.CommandBarButton cmdBarbutton, ref bool cancel)
+        {
+            RePubForm frm3 = new RePubForm();
+            frm3.Show();
         }
 
         private void refreshAll(Office.CommandBarButton cmdBarbutton, ref bool cancel)
@@ -108,59 +120,5 @@ namespace Excalibur.ExcelClient
 
     }
 
-    public static class TokenStore
-    {
-        private static int daysToExpire = 15; //15 days for token to expire
-
-        public static void addTokenToStore(string token)
-        {
-            if (Properties.Settings.Default.Token == "")
-            {
-                Properties.Settings.Default.Token = token;
-                Properties.Settings.Default.TokenDate = DateTime.Today;
-                Properties.Settings.Default.Save();
-            }
-
-        }
-
-        public static string getTokenFromStore()
-        {
-            RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", false);
-            string myValue = (string)myKey.GetValue("Token");
-            
-            return myValue;
-        }
-
-        public static DateTime getTokenDateFromStore()
-        {
-            return Properties.Settings.Default.TokenDate;
-        }
-
-        public static bool checkTokenInStore()
-        {
-            bool is_TokenInStore;
-
-            if (Properties.Settings.Default.Token != "")
-            {
-                is_TokenInStore = true;
-            }
-            else
-            {
-                is_TokenInStore = false;
-            }
-            return is_TokenInStore;
-        }
-
-        public static void checkTokenExpiry()
-        {
-            DateTime tokenDate;
-            tokenDate = Properties.Settings.Default.TokenDate;
-            if (DateTime.Today >= tokenDate.AddDays(daysToExpire))
-            {
-                Properties.Settings.Default.Token = "";
-                Properties.Settings.Default.Save();
-            }
-        }
-
-    }
+    
 }

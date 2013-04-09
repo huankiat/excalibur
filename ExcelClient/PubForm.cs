@@ -14,6 +14,7 @@ using Newtonsoft.Json.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Excalibur.Models;
 using VBIDE = Microsoft.Vbe.Interop;
+using Office = Microsoft.Office.Core;
 
 namespace Excalibur.ExcelClient
 {
@@ -22,7 +23,6 @@ namespace Excalibur.ExcelClient
         public PubForm()
         {
             InitializeComponent();
-            //ThisAddIn.AddMacro();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -37,9 +37,17 @@ namespace Excalibur.ExcelClient
             string token;
             int ssID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
 
+            MessageBox.Show(ssID.ToString());
+
             if (ssID == 0)
             {
-                ch.getSpreadSheetID(wb.Name.ToString());
+                Microsoft.Office.Core.DocumentProperties properties;
+                properties = (Office.DocumentProperties)wb.CustomDocumentProperties;
+                
+                ssID = Convert.ToInt32(ch.getSpreadSheetID(wb.Name.ToString()));
+                properties.Add("Excalibur ID", false,
+                   Microsoft.Office.Core.MsoDocProperties.msoPropertyTypeString, ssID);
+                
             }
             
 
@@ -50,10 +58,9 @@ namespace Excalibur.ExcelClient
             else
             {
                 //get token and send token together with publication request
-                int spreadSheetID = Convert.ToInt32(ch.checkSpreadSheetID(wb));
                 token = TokenStore.getTokenFromStore();
                 ch.setAuthToken(token);
-                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), spreadSheetID);
+                returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), ssID);
                 rng.Name = "PUB_" + returnID;
                 MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
 

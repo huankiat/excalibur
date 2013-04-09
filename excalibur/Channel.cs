@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using Excel = Microsoft.Office.Interop.Excel;
 using Office = Microsoft.Office.Core;
 using Microsoft.Office.Tools.Excel;
+using Microsoft.Win32;
 
 
 namespace Excalibur.Models
@@ -116,10 +117,9 @@ namespace Excalibur.Models
         //If getChannelJson has not been called yet, call getChannelJson.
         public string getChannelData(string channelID)
         {
-            if (channelJson == null)
-            {
+           
                 getChannelJson(channelID);
-            }
+         
 
             var channel = channelJson.channel;
             string data = channel.value;
@@ -129,10 +129,9 @@ namespace Excalibur.Models
         //get channel description
         public string getChannelDesc(string channelID)
         {
-            if (channelJson == null)
-            {
+            
                 getChannelJson(channelID);
-            }
+            
 
             var channel = channelJson.channel;
             string data = channel.description;
@@ -143,10 +142,9 @@ namespace Excalibur.Models
         //get AssigneeIDs for a channel as int[]
         public int[] getAssigneeIDs(string channelID)
         {
-            if (channelJson == null)
-            {
+         
                 getChannelJson(channelID);
-            }
+            
             
             var channel = channelJson.channel;
             List<int> assignee_id = new List<int>();
@@ -162,10 +160,9 @@ namespace Excalibur.Models
         //get Owner ID for a channel
         public int getOwnerID(string channelID)
         {
-            if (channelJson == null)
-            {
+           
                 getChannelJson(channelID);
-            }
+            
             
             var channel = channelJson.channel;
             int data = channel.owner_id;
@@ -175,10 +172,9 @@ namespace Excalibur.Models
         //get spreadsheetID for a channel
         public int getChannelSpreadSheetID(string channelID)
         {
-            if (channelJson == null)
-            {
+           
                 getChannelJson(channelID);
-            }
+          
 
             var channel = channelJson.channel;
             int data = channel.spreadsheet_id;
@@ -396,42 +392,35 @@ namespace Excalibur.Models
         public string channelsRefresh(Excel.Workbook wb)
         {
             string message = "Error in refreshing";
-            
+            int channelID;
+            string partial_name;
+            string full_name;
+
             foreach (Excel.Name nRange in wb.Names)
             {
-                string full_name = nRange.Name.ToString();
-                nRange.Name = full_name;
+                full_name = nRange.Name.ToString();
+                partial_name = full_name.Substring(4);
+                channelID = Convert.ToInt32(partial_name);
 
-                if (full_name.Substring(0, 3) == "SUB" | full_name.Substring(0, 3) == "PUB")
+                if (full_name.Substring(0, 3) == "SUB")
                 {
-                    string partial_name = full_name.Substring(4);
-                    char[] delim = { '_' };
-                    string[] splitTxt = partial_name.Split(delim);
-                    string cellID = splitTxt[0];
-                    int channelID = Convert.ToInt32(cellID);
-
-                    if (full_name.Substring(0, 3) == "SUB")
-                    {
-                        nRange.RefersToRange.Value = this.getChannelData(cellID);
-                    }
-                    else
-                    {
-                        if (this.checkSpreadSheetID(wb) == "Nil")
-                        {
-                            message = "You need to register this workbook";
-                        }
-                        else
-                        {
-                            
-                            string r_value = nRange.RefersToRange.Value.ToString();
-                            int fileID = Convert.ToInt32(this.checkSpreadSheetID(wb));
-                            string cellDesc = this.getChannelDesc(cellID);
-                            message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, false);
-                            
-                        }
-                    }
+                    nRange.RefersToRange.Value = this.getChannelData(channelID.ToString());
+                    message = "Successful";
+                }
+                else if (full_name.Substring(0,3) == "PUB" & checkSpreadSheetID(wb) == "0")
+                {                       
+                    message = "You need to register this workbook";
+                }
+                        
+                else if (full_name.Substring(0,3) == "PUB" & checkSpreadSheetID(wb) != "0")
+                {                            
+                    string r_value = nRange.RefersToRange.Value.ToString();
+                    int fileID = Convert.ToInt32(checkSpreadSheetID(wb));
+                    string cellDesc = this.getChannelDesc(channelID.ToString());
+                    message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, false);                           
                 }
             }
+            
             return message;
         }
 
@@ -457,6 +446,7 @@ namespace Excalibur.Models
 
     }
 
+    //NOT USED - Use TokenStore instead//
     public class AuthToken
     {
         private string authToken;
@@ -526,4 +516,74 @@ namespace Excalibur.Models
         }
 
     }
+}
+
+
+public static class TokenStore
+{
+    private static int daysToExpire = 15; //15 days for token to expire
+
+    public static void addTokenToStore(string token)
+    {
+        if (Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur")==null)
+        {
+            Registry.CurrentUser.CreateSubKey("SOFTWARE\\Excalibur");
+        }
+        RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", true);
+        myKey.SetValue("Token", token, RegistryValueKind.String);
+        myKey.SetValue("TokenDate", DateTime.Today.ToShortDateString(), RegistryValueKind.String);
+
+    }
+
+    public static string getTokenFromStore()
+    {
+        RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", false);
+        string myValue = (string)myKey.GetValue("Token");
+
+        return myValue;
+    }
+
+    public static DateTime getTokenDateFromStore()
+    {
+        RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", false);
+        DateTime myValue = (DateTime)Convert.ToDateTime(myKey.GetValue("TokenDate"));
+
+        return myValue;
+    }
+
+    public static bool checkTokenInStore()
+    {
+        bool is_TokenInStore;
+
+        if (Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur") == null)
+        {
+            is_TokenInStore = false;
+        }
+        else
+        {
+            RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", false);
+            if (myKey.GetValue("Token") == null)
+            {
+                is_TokenInStore = false;
+            }
+            else
+            {
+                is_TokenInStore = true;
+            }
+        }
+        return is_TokenInStore;
+    }
+
+    public static void checkTokenExpiry()
+    {
+        DateTime tokenDate;
+        tokenDate = TokenStore.getTokenDateFromStore();
+        if (DateTime.Today >= tokenDate.AddDays(daysToExpire))
+        {
+            RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", true);
+            myKey.SetValue("Token", "", RegistryValueKind.String);
+            myKey.SetValue("TokenDate", "", RegistryValueKind.String);
+        }
+    }
+
 }

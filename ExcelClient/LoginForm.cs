@@ -46,21 +46,10 @@ namespace Excalibur.ExcelClient
             else
             {
                 loginErrorLabel.Visible = false;
-                authtoken.setToken(token);
-                authtoken.createCookieInContainer();
-                at = authtoken;
-                string readouttoken = authtoken.readTokenFromStore();
-                MessageBox.Show(readouttoken, "Token Obtained and Stored");
+                TokenStore.addTokenToStore(token);
+                MessageBox.Show(TokenStore.getTokenFromStore(), "Token Obtained and Stored");
                 
-                //write to registry
-                Registry.CurrentUser.CreateSubKey("SOFTWARE\\Excalibur");
-                RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", true);
-                myKey.SetValue("Token", readouttoken, RegistryValueKind.String);
-
-                Properties.Settings.Default.Token = readouttoken;
-                Properties.Settings.Default.Save();
                 LoginForm.ActiveForm.Close();
-                MessageBox.Show(Properties.Settings.Default.Token, "Token Obtained and Stored");
              
                 
             }
