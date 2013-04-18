@@ -272,13 +272,39 @@ namespace Excalibur.Models
             dataStream.Close();
 
             //receive response
-            WebResponse response = request.GetResponse();
-            dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
+            string responseFromServer = "";
+            try
+            {
+                WebResponse response = request.GetResponse();
+                dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
 
-            string responseFromServer = reader.ReadToEnd();
-            reader.Close();
-            response.Close();
+                responseFromServer = reader.ReadToEnd();
+                reader.Close();
+                response.Close();
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse webResponse = ex.Response as HttpWebResponse;
+                if (webResponse.StatusCode == HttpStatusCode.NotFound)
+                {
+                    responseFromServer = "404";
+                }
+                else if (webResponse.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    responseFromServer = "401";
+                }
+                else if (webResponse.StatusCode == HttpStatusCode.Conflict)
+                {
+                    responseFromServer = "409";
+                }
+                else if (webResponse.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    responseFromServer = "403";
+                }
+
+                webResponse.Close();
+            }
 
             return responseFromServer.ToString();
 
@@ -383,6 +409,11 @@ namespace Excalibur.Models
                 {
                     returnID = "404";
                 }
+                else if (webResponse.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    returnID = "401";
+                }
+
                 webResponse.Close();
             }
            
@@ -447,75 +478,75 @@ namespace Excalibur.Models
     }
 
     //NOT USED - Use TokenStore instead//
-    public class AuthToken
-    {
-        private string authToken;
-        private Cookie excaliburCookie;
-        public static CookieContainer cContainer;
-        private Uri cURI;
+//    public class AuthToken
+//    {
+//        private string authToken;
+//        private Cookie excaliburCookie;
+//        public static CookieContainer cContainer;
+//        private Uri cURI;
 
-        public AuthToken()
-        {
-            cURI = new Uri("http://www.processclick.com/");
-        }
+//        public AuthToken()
+//        {
+//            cURI = new Uri("http://www.processclick.com/");
+//        }
 
-        public void setCookieURI(Uri cookieURI)
-        {
-            cURI = cookieURI;
-        }
+//        public void setCookieURI(Uri cookieURI)
+//        {
+//            cURI = cookieURI;
+//        }
 
-        public void setToken(string token)
-        {
-            authToken = token;
-        }
+//        public void setToken(string token)
+//        {
+//            authToken = token;
+//        }
 
-        public Cookie getCookie()
-        {
-            return excaliburCookie;
-        }
+//        public Cookie getCookie()
+//        {
+//            return excaliburCookie;
+//        }
     
 
-        public void createCookieInContainer()
-        {
-            CookieContainer cc = new CookieContainer();
-            Cookie c = new Cookie();
-            cc.MaxCookieSize = 5000;
+//        public void createCookieInContainer()
+//        {
+//            CookieContainer cc = new CookieContainer();
+//            Cookie c = new Cookie();
+//            cc.MaxCookieSize = 5000;
 
-            c.Value = authToken;
-            c.Name = "ExcaliburToken";
-            cc.Add(cURI, c);
-            excaliburCookie = c;
-            AuthToken.cContainer = cc;
-        }
+//            c.Value = authToken;
+//            c.Name = "ExcaliburToken";
+//            cc.Add(cURI, c);
+//            excaliburCookie = c;
+//            AuthToken.cContainer = cc;
+//        }
 
 
-        public string readTokenFromStore()
-        {
-            string token = "X";
-            CookieCollection cookies = new CookieCollection();
+//        public string readTokenFromStore()
+//        {
+//            string token = "X";
+//            CookieCollection cookies = new CookieCollection();
 
-            cookies = AuthToken.cContainer.GetCookies(cURI);
+//            cookies = AuthToken.cContainer.GetCookies(cURI);
 
-            if (cookies.Count == 0)
-            {
-                token = "No cookie detected";
-            }
-            else
-            {
-                for (int i = 0; i < cookies.Count; i++)
-                {
-                    Cookie c = cookies[i];
-                    if (c.Name == "ExcaliburToken")
-                    {
-                        token = c.Value;
-                    }
+//            if (cookies.Count == 0)
+//            {
+//                token = "No cookie detected";
+//            }
+//            else
+//            {
+//                for (int i = 0; i < cookies.Count; i++)
+//                {
+//                    Cookie c = cookies[i];
+//                    if (c.Name == "ExcaliburToken")
+//                    {
+//                        token = c.Value;
+//                    }
 
-                }
-            }
-            return token;
-        }
+//                }
+//            }
+//            return token;
+//        }
 
-    }
+//    }
 }
 
 
@@ -562,7 +593,7 @@ public static class TokenStore
         else
         {
             RegistryKey myKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Excalibur", false);
-            if (myKey.GetValue("Token") == null)
+            if (myKey.GetValue("Token").ToString() == ""| myKey.GetValue("Token")==null )
             {
                 is_TokenInStore = false;
             }

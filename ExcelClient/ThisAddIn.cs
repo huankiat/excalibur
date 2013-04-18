@@ -29,8 +29,12 @@ namespace Excalibur.ExcelClient
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             this.AddContextMenu();
-            
+            if (TokenStore.checkTokenInStore())
+            {
+                TokenStore.checkTokenExpiry();
+            }
         }
+
 
 
 

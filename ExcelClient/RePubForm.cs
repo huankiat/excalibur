@@ -23,15 +23,24 @@ namespace Excalibur.ExcelClient
         {           
             InitializeComponent();
             InitializePubComboBox();
-            checkSSID();
+            checkSSIDPassword();
         }
 
-        private void checkSSID()
+        private void checkSSIDPassword()
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Channel ch = new Channel();
-            ch.setAuthToken(TokenStore.getTokenFromStore());
+
+            if (!TokenStore.checkTokenInStore())
+            {
+                LoginForm frm = new LoginForm();
+                frm.Show();
+            }
+            else
+            {
+                ch.setAuthToken(TokenStore.getTokenFromStore());
+            }
 
             if (ch.checkSpreadSheetID(wb) == "0")
             {
@@ -93,6 +102,8 @@ namespace Excalibur.ExcelClient
 
         private void rePubButton_Click(object sender, EventArgs e)
         {
+            string responseFromServer;
+
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel.Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Excel.Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
@@ -101,22 +112,34 @@ namespace Excalibur.ExcelClient
             this.readSelectedChannel();
             ch.setAuthToken(TokenStore.getTokenFromStore());
 
-            ch.rePublishChannel(channelSelected, descriptionTextBox.Text, rng.Value.ToString(),
+            responseFromServer = ch.rePublishChannel(channelSelected, descriptionTextBox.Text, rng.Value.ToString(),
                 spreadSheetID, forceCheckBox.Checked);
-            rng.Name = "PUB_" + channelSelected.ToString();
+            if (responseFromServer == "409")
+            {
+                MessageBox.Show(@"This workbook is not the original publisher. 
+                        Please check 'OverWrite' and retry if you want to overwrite data in the channel", "Cannot Overwrite");
+            }
+            else if (responseFromServer == "401")
+            {
+                MessageBox.Show(@"You are not authorized to publish into the channel", "Unauthorized");
+            }
+            else
+            {
+                rng.Name = "PUB_" + channelSelected.ToString();
 
-            //Add indicator to show publication status
-            Excel.Shape aShape;
-            aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
-                                        rng.Top, 3, 3);
-            aShape.Name = "Pub";
-            aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
-            aShape.Fill.Solid();
-            aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
-            aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
-            aShape.Placement = Excel.XlPlacement.xlMove;
+                //Add indicator to show publication status
+                Excel.Shape aShape;
+                aShape = ws.Shapes.AddShape(Microsoft.Office.Core.MsoAutoShapeType.msoShapeCross, rng.Left,
+                                            rng.Top, 3, 3);
+                aShape.Name = "Pub";
+                aShape.Fill.Visible = Microsoft.Office.Core.MsoTriState.msoTrue;
+                aShape.Fill.Solid();
+                aShape.Line.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+                aShape.Fill.ForeColor.RGB = Color.FromArgb(200, 200, 90).ToArgb();
+                aShape.Placement = Excel.XlPlacement.xlMove;
 
-            RePubForm.ActiveForm.Close();
+                RePubForm.ActiveForm.Close();
+            }
         }
 
         

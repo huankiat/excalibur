@@ -13,7 +13,6 @@ namespace Excalibur.ExcelClient
 {
     public partial class LoginForm : Form
     {
-        public AuthToken at;
 
 
         public LoginForm()
@@ -21,25 +20,19 @@ namespace Excalibur.ExcelClient
             InitializeComponent();
             InitializePasswordBox();
             loginErrorLabel.Visible = false;
-            at = new AuthToken();
         }
 
-        public AuthToken getAuthToken()
-        {
-            return at;
-        }
 
 
         private void loginButton_Click(object sender, EventArgs e)
         {
             Channel ch = new Channel();
-            AuthToken authtoken = new AuthToken();
             
             string username = usernameBox.Text.ToString();
             string password = passwordBox.Text.ToString();
             string token = ch.getToken(username, password);
 
-            if (token == "404")
+            if (token == "404"|token == "401")
             {
                 loginErrorLabel.Visible = true;
             }
