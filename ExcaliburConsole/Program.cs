@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Net;
 using Excalibur.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ExcaliburConsole
 {
@@ -16,8 +18,9 @@ namespace ExcaliburConsole
             Channel ch = new Channel();
      
             string token = ch.getToken("huankiat@processclick.com", "password");
-            
-            string response = ch.publishChannel("ConsoleAuth", "123", 12);
+            ch.setAuthToken(token);
+
+            string response = ch.getAllBroadcastsChannels().ToString();
             //string token = ch.getToken("huankiat@processclick.com", "password");
             //Console.Write("Token from Website: " + token + "\n");
 

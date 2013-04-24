@@ -24,6 +24,8 @@ namespace Excalibur.ExcelClient
         string channelID;
         string channelName;
         string channelValue;
+        string broadcastID;
+        string broadcastDes;
         Channel ch;
         
         public SubForm()
@@ -32,39 +34,92 @@ namespace Excalibur.ExcelClient
             currentValue = "";
             currentFormula = "";
             InitializeComponent();
-            InitializeComboBox();
+            InitializeBroadCastComboBox();
 
         }
       
 
-        private void InitializeComboBox()
+        private void InitializeBroadCastComboBox()
         {
 
-            ch.setAuthToken(Properties.Settings.Default.Token.ToString());
-            JArray d = ch.getAllChannels();
-            JArray datafeed = ch.filterPermittedChannels(1, d);
+
+            if (!TokenStore.checkTokenInStore())
+            {
+                LoginForm frm = new LoginForm();
+                frm.Show();
+            }
+            else
+            {
+                ch.setAuthToken(TokenStore.getTokenFromStore());
+            }
+
+            JArray d = ch.getAllBroadcastsChannels();
+
+            if (d.ToString() == "[]")
+            {
+                broadcastComboBox.Items.Add("No broadcast available");
+
+            }
+            else
+            {
+                MessageBox.Show(d.ToString());
+            }
+
+
+            //if (d == null)
+            //{
+            //    MessageBox.Show("Null Array");
+            //    //broadcastComboBox.Items.Add("No Broadcast");
+            //    //broadcastComboBox.SelectedIndex = 0;
+            //    //JArray datafeed = ch.getBroadcastsList(1, d);
+            //    //foreach (dynamic data in datafeed)
+            //    //{
+            //    //    broadcastComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());
+            //    //}
+            //}
+            //else
+            //{
+            //    broadcastComboBox.Items.Add("No Broadcast");
+            //    broadcastComboBox.SelectedIndex = 0;
+            //}
+        }
+
+        private void InitializeChannelComboBox()
+        {
+
+            JArray d = ch.getAllBroadcastsChannels();
+            JArray channelsList = ch.getBroadcastChannelList(broadcastID, d);
+            JArray datafeed = ch.filterPermittedChannels(1, channelsList);
             if (datafeed.ToString() != "[]")
             {
                 foreach (dynamic data in datafeed)
                 {
-                    comboBox2.Items.Add(data.id.ToString() + "-" + data.description.ToString());
+                    channelComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());
                 }
             }
             else
             {
-                comboBox2.Items.Add("No data in the channel");
-                comboBox2.SelectedIndex = 0;
+                channelComboBox.Items.Add("No channel in broadcast");
+                //channelComboBox.SelectedIndex = 0;
             }
         }
 
-        private void comboxbox1_Select(object sender, EventArgs e)
+        private void broadcastCombox_Select(object sender, EventArgs e)
+        {
+            string[] nameArray = broadcastComboBox.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
+            broadcastID = nameArray[0];
+            broadcastDes = nameArray[1];
+            InitializeChannelComboBox();
+        }
+
+        private void channelComboBox_Select(object sender, EventArgs e)
         {
             Excel.Application exApp = Globals.ThisAddIn.Application as Excel.Application;
             Excel._Worksheet ws = exApp.ActiveSheet as Excel.Worksheet;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
 
             
-            string[] nameArray = comboBox2.SelectedItem.ToString().Split(new string[] {"-"}, StringSplitOptions.None);
+            string[] nameArray = channelComboBox.SelectedItem.ToString().Split(new string[] {"-"}, StringSplitOptions.None);
             
             channelID = nameArray[0];
             channelName = nameArray[1];
@@ -79,7 +134,7 @@ namespace Excalibur.ExcelClient
             Excel._Workbook wb = exApp.ActiveWorkbook as Excel.Workbook;
             Excel.Range rng = (Excel.Range)exApp.ActiveCell;
 
-            string[] nameArray = comboBox2.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
+            string[] nameArray = channelComboBox.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
 
             channelID = nameArray[0];
             channelValue = ch.getChannelData(channelID);
@@ -135,6 +190,11 @@ namespace Excalibur.ExcelClient
             rng.Formula = currentFormula;
             
             currentValue = "";
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
 
         }
 

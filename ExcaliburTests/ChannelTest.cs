@@ -39,7 +39,7 @@ namespace ExcaliburTests
                 };
 
                 Channel ch = new Channel();
-                JArray json = ch.getAllChannels();
+                JArray json = ch.getAllBroadcastsChannels();
                 
                 StringAssert.AreEqualIgnoringCase("GET", actualMethod);
                 StringAssert.AreEqualIgnoringCase("http://panoply-staging.herokuapp.com/api/channels.json", actualURL);

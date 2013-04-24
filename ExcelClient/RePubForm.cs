@@ -68,7 +68,7 @@ namespace Excalibur.ExcelClient
             Channel ch = new Channel();      
             string token = TokenStore.getTokenFromStore();
             ch.setAuthToken(token);
-            JArray d = ch.getAllChannels();
+            JArray d = ch.getAllBroadcastsChannels();
 
             //Need User ID to send into filterPermittedChannels
             JArray datafeed = ch.filterPermittedChannels(1, d);

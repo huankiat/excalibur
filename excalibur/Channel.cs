@@ -20,7 +20,7 @@ namespace Excalibur.Models
     {
 
         //All available channel endpoints
-        private string getChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
+        private string getChannelURL = "http://panoply-staging.herokuapp.com/api/broadcasts.json";
         private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
         private string channelDataURL = "http://panoply-staging.herokuapp.com/api/channels/";
         private string fileIDURL = "http://panoply-staging.herokuapp.com/api/spreadsheets.json";
@@ -46,7 +46,7 @@ namespace Excalibur.Models
             }
         }
 
-        public JArray getAllChannels()
+        public JArray getAllBroadcastsChannels()
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getChannelURL);
             request.Method = "GET";
@@ -62,13 +62,48 @@ namespace Excalibur.Models
 
 
                 dynamic json = JValue.Parse(responseString);
-                JArray datafeed = json.channels;
+                JArray datafeed = json.broadcasts;
                 reader.Close();
                 response.Close();
 
                 return datafeed;
             }
             
+        }
+
+        public JArray getBroadcastsList(int userID, JArray datafeed)
+        {
+            JArray broadcastsList = new JArray();
+
+            foreach (JObject json in datafeed)
+            {
+                dynamic output = new JObject();
+                dynamic input = new JObject();
+                input = json;
+                output.id = input.id;
+                output.description = input.description;
+                broadcastsList.Add(output);               
+            }
+
+            return broadcastsList;
+
+        }
+
+        public JArray getBroadcastChannelList(string broadcastID, JArray datafeed)
+        {
+            JArray broadcastChannelList = new JArray();
+            foreach (JObject json in datafeed)
+            {
+                dynamic broadcast = new JObject();
+                broadcast = json;
+                if (broadcast.id == broadcastID)
+                {
+                    broadcastChannelList = broadcast.channels;
+                }
+            }
+
+            return broadcastChannelList;
+
         }
 
         public JArray filterPermittedChannels(int userID, JArray datafeed)
