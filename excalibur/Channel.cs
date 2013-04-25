@@ -15,7 +15,27 @@ using Microsoft.Win32;
 
 namespace Excalibur.Models
 {
-   
+    
+    public class AuthChannel
+    {
+        private string authToken = "";
+
+        public string tokenValue()
+        {
+            if (TokenStore.checkTokenInStore())
+            {
+                authToken = TokenStore.getTokenFromStore();
+            }
+            else
+            {
+                authToken = "";
+            }
+
+            return authToken;
+        }
+
+    }
+    
     public class Channel
     {
 
@@ -29,6 +49,82 @@ namespace Excalibur.Models
         private string authToken = "";
         private dynamic channelJson;
 
+
+        private String processclick_GET_request(string channelURL)
+        {
+            String responseTxt = "";
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelURL);
+            request.Method = "GET";
+            request.Accept = "application/json";
+            request.ContentType = "application/json";
+            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + this.authToken;
+            
+            WebResponse response = request.GetResponse();
+            using (Stream stream = response.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
+                String responseString = reader.ReadToEnd();
+                responseTxt = responseString;
+                reader.Close();
+            }
+            response.Close();
+
+            return responseTxt;
+        }
+
+        private String processclick_POST_request(string channelURL, string datafeed, string method="POST")
+        {
+            String responseTxt = "";
+            byte[] byteArray = Encoding.UTF8.GetBytes(datafeed);
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelURL);
+            request.Method = method;
+            request.Accept = "application/json";
+            request.ContentType = "application/json";
+            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + this.authToken;
+            request.ContentLength = byteArray.Length;
+
+            Stream dataStream = request.GetRequestStream();
+            dataStream.Write(byteArray, 0, byteArray.Length);
+            dataStream.Close();
+
+            try
+            {
+                WebResponse response = request.GetResponse();
+                dataStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(dataStream);
+
+                responseTxt = reader.ReadToEnd();
+                reader.Close();
+                response.Close();
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse webResponse = ex.Response as HttpWebResponse;
+                if (webResponse.StatusCode == HttpStatusCode.NotFound)
+                {
+                    responseTxt = "404";
+                }
+                else if (webResponse.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    responseTxt = "401";
+                }
+                else if (webResponse.StatusCode == HttpStatusCode.Conflict)
+                {
+                    responseTxt = "409";
+                }
+                else if (webResponse.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    responseTxt = "403";
+                }
+
+                webResponse.Close();
+            }
+
+            return responseTxt;
+        }
+        
         public void setAuthToken(string token)
         {
             authToken = token;
@@ -46,29 +142,13 @@ namespace Excalibur.Models
             }
         }
 
+
         public JArray getAllBroadcastsChannels()
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(getChannelURL);
-            request.Method = "GET";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
-
-            WebResponse response = request.GetResponse();
-            using (Stream stream = response.GetResponseStream())
-            {
-                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-                String responseString = reader.ReadToEnd();
-
-
-                dynamic json = JValue.Parse(responseString);
-                JArray datafeed = json.broadcasts;
-                reader.Close();
-                response.Close();
-
-                return datafeed;
-            }
-            
+            String responseString = this.processclick_GET_request(getChannelURL);
+            dynamic json = JValue.Parse(responseString);
+            JArray datafeed = json.broadcasts;
+            return datafeed;
         }
 
         public JArray getBroadcastsList(int userID, JArray datafeed)
@@ -124,28 +204,31 @@ namespace Excalibur.Models
 
         }
 
-        /// <summary>
-        /// get json for a single channel, include id, description, value, spreadsheet_id, owner_id, assignee_id
-        /// </summary>
-        /// <param name="channelID"></param>
+        public JArray BroadcastList(int selector)
+        {
+            string filter = "";
+
+            if (selector == 0)
+            {
+                filter = "owned";
+            }
+            else if (selector == 1)
+            {
+                filter = "followed";
+            }
+
+            String responseString = this.processclick_GET_request(this.getChannelURL + "?filter=" + filter);
+            dynamic json = JValue.Parse(responseString);
+            JArray datafeed = json.broadcasts;
+            return datafeed;
+            
+        }
+
         public void getChannelJson(string channelID)
         {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(channelDataURL + channelID + ".json");
-            request.Method = "GET";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-
-            WebResponse response = request.GetResponse();
-            using (Stream stream = response.GetResponseStream())
-            {
-                StreamReader reader = new StreamReader(stream, Encoding.UTF8);
-                String responseString = reader.ReadToEnd();
-                dynamic json = JValue.Parse(responseString);
-
-                channelJson = json;
-                reader.Close();
-                response.Close();
-            }
+            String responseString = this.processclick_GET_request(this.channelDataURL + channelID + ".json");
+            dynamic json = JValue.Parse(responseString);
+            channelJson = json;
         }
 
         //get channel data from getChannelJson(channelID). 
@@ -242,31 +325,9 @@ namespace Excalibur.Models
 
                 datafeed.channel = data;
 
-
-                byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
-
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(postChannelURL);
-                request.Method = "POST";
-                request.Accept = "application/json";
-                request.ContentType = "application/json";
-                request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
-                request.ContentLength = byteArray.Length;
-                Console.Write(request.Headers.AllKeys.ToString());
-
-                Stream dataStream = request.GetRequestStream();
-                dataStream.Write(byteArray, 0, byteArray.Length);
-                dataStream.Close();
-
-                //receive response
-                WebResponse response = request.GetResponse();
-                dataStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(dataStream);
-
-                string responseFromServer = reader.ReadToEnd();
+                String responseFromServer = this.processclick_POST_request(postChannelURL, datafeed.ToString());
                 dynamic json = JValue.Parse(responseFromServer);
                 returnID = json.id;
-                reader.Close();
-                response.Close();
             }
             else
             {
@@ -278,7 +339,8 @@ namespace Excalibur.Models
 
         }
 
-        public string rePublishChannel(int channelID, string description, string value, int spreadsheet_id, bool to_replace)
+        public string rePublishChannel(int channelID, string description, 
+            string value, int spreadsheet_id, bool to_replace)
         {
             var jsonObject = new JObject();
             dynamic datafeed = jsonObject;
@@ -293,57 +355,10 @@ namespace Excalibur.Models
             datafeed.channel = data;
             datafeed.force = to_replace.ToString();
 
-            byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(rePubURL + channelID.ToString() + ".json");
-            request.Method = "PUT";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-            request.ContentLength = byteArray.Length;
-            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
-
-            Stream dataStream = request.GetRequestStream();
-            dataStream.Write(byteArray, 0, byteArray.Length);
-            dataStream.Close();
-
-            //receive response
-            string responseFromServer = "";
-            try
-            {
-                WebResponse response = request.GetResponse();
-                dataStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(dataStream);
-
-                responseFromServer = reader.ReadToEnd();
-                reader.Close();
-                response.Close();
-            }
-            catch (WebException ex)
-            {
-                HttpWebResponse webResponse = ex.Response as HttpWebResponse;
-                if (webResponse.StatusCode == HttpStatusCode.NotFound)
-                {
-                    responseFromServer = "404";
-                }
-                else if (webResponse.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    responseFromServer = "401";
-                }
-                else if (webResponse.StatusCode == HttpStatusCode.Conflict)
-                {
-                    responseFromServer = "409";
-                }
-                else if (webResponse.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    responseFromServer = "403";
-                }
-
-                webResponse.Close();
-            }
+            string responseFromServer=this.processclick_POST_request(rePubURL+ channelID.ToString() + ".json",
+                                      datafeed.ToString(),"PUT");
 
             return responseFromServer.ToString();
-
-
         }
 
         public string getSpreadSheetID(string filename)
@@ -354,34 +369,11 @@ namespace Excalibur.Models
 
             dynamic data = new JObject();
             data.filename = filename;
-
             datafeed.spreadsheet = data;
-            byte[] byteArray = Encoding.UTF8.GetBytes(datafeed.ToString());
 
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fileIDURL);
-            request.Method = "POST";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-            request.ContentLength = byteArray.Length;
-            request.Headers[HttpRequestHeader.Authorization] = "Token token=" + authToken;
-
-            Stream dataStream = request.GetRequestStream();
-            dataStream.Write(byteArray, 0, byteArray.Length);
-            dataStream.Close();
-
-            //receive response
-            WebResponse response = request.GetResponse();
-            dataStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(dataStream);
-
-            string responseFromServer = reader.ReadToEnd();
-
+            string responseFromServer = this.processclick_POST_request(fileIDURL, datafeed.ToString());
             dynamic json = JValue.Parse(responseFromServer);
-            string fileID = json.id.ToString();
-
-            reader.Close();
-            dataStream.Close();
-            response.Close();
+            string fileID = json.id.ToString();         
 
             return fileID;
         }
@@ -410,47 +402,9 @@ namespace Excalibur.Models
             auth.email = username;
             auth.password = password;
 
-            byte[] byteArray = Encoding.UTF8.GetBytes(auth.ToString());
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(tokenURL);
-            request.Method = "POST";
-            request.Accept = "application/json";
-            request.ContentType = "application/json";
-            request.ContentLength = byteArray.Length;
-
-            Stream dataStream = request.GetRequestStream();
-            dataStream.Write(byteArray, 0, byteArray.Length);
-            dataStream.Close();
-
-            //receive response
-            WebResponse response;
-            string returnID = "";
-            try
-            {
-                response = request.GetResponse();
-                dataStream = response.GetResponseStream();
-                StreamReader reader = new StreamReader(dataStream);
-
-                string responseFromServer = reader.ReadToEnd();
-                dynamic json = JValue.Parse(responseFromServer);
-                returnID = json.authentication_token;
-                reader.Close();
-                response.Close();
-            }
-            catch (WebException ex)
-            {
-                HttpWebResponse webResponse = ex.Response as HttpWebResponse;
-                if (webResponse.StatusCode == HttpStatusCode.NotFound)
-                {
-                    returnID = "404";
-                }
-                else if (webResponse.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    returnID = "401";
-                }
-
-                webResponse.Close();
-            }
+            string responseFromServer = this.processclick_POST_request(tokenURL, auth.ToString());
+            dynamic json = JValue.Parse(responseFromServer);
+            string returnID = json.authentication_token;                
            
             return returnID;
         }
