@@ -22,11 +22,34 @@ namespace Excalibur.ExcelClient
     {
         
         int spreadSheetID;
+        Channel ch;
         
         public PubForm()
         {
+            ch = new Channel();
             InitializeComponent();
             checkSSIDPassword();
+            InitializePermittedBroadcastsComboBox();
+        }
+
+        private void InitializePermittedBroadcastsComboBox()
+        {
+
+            JArray d = ch.getPermittedBroadcastsChannels();
+            JArray broadcastsList = ch.getBroadcastsList(d);
+          
+            if (broadcastsList.ToString() != "[]")
+            {
+                foreach (dynamic data in broadcastsList)
+                {
+                    broadcastComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());
+                }
+            }
+            else
+            {
+                broadcastComboBox.Items.Add("No channel in broadcast");
+                //broadcastComboBox.SelectedIndex = 0;
+            }
         }
 
         private void checkSSIDPassword()
@@ -75,11 +98,17 @@ namespace Excalibur.ExcelClient
             Channel ch = new Channel();
             string returnID;
             string token;
-            
+            int broadcastID;
+
+            string[] array = broadcastComboBox.SelectedItem.ToString().Split(new string[] { "-" }, StringSplitOptions.None);
+
+            broadcastID = Convert.ToInt16(array[0]);
+
             //get token and send token together with publication request
             token = TokenStore.getTokenFromStore();
             ch.setAuthToken(token);
-            returnID = ch.publishChannel(textBox1.Text.ToString(), rng.Value.ToString(), spreadSheetID);
+            returnID = ch.publishChannel(feedNametextBox.Text.ToString(), rng.Value.ToString(), 
+                spreadSheetID, broadcastID);
             rng.Name = "PUB_" + returnID;
             MessageBox.Show("Published as Channel ID:" + returnID, "Response from Server");
 

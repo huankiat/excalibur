@@ -40,7 +40,8 @@ namespace Excalibur.Models
     {
 
         //All available channel endpoints
-        private string getChannelURL = "http://panoply-staging.herokuapp.com/api/broadcasts.json";
+        private string getAllBroadcastsURL = "http://panoply-staging.herokuapp.com/api/broadcasts.json";
+        private string getPermittedBroadcastsURL = "http://panoply-staging.herokuapp.com/api/broadcasts.json?filter=owned";
         private string postChannelURL = "http://panoply-staging.herokuapp.com/api/channels.json";
         private string channelDataURL = "http://panoply-staging.herokuapp.com/api/channels/";
         private string fileIDURL = "http://panoply-staging.herokuapp.com/api/spreadsheets.json";
@@ -145,13 +146,21 @@ namespace Excalibur.Models
 
         public JArray getAllBroadcastsChannels()
         {
-            String responseString = this.processclick_GET_request(getChannelURL);
+            String responseString = this.processclick_GET_request(getAllBroadcastsURL);
             dynamic json = JValue.Parse(responseString);
             JArray datafeed = json.broadcasts;
             return datafeed;
         }
 
-        public JArray getBroadcastsList(int userID, JArray datafeed)
+        public JArray getPermittedBroadcastsChannels()
+        {
+            String responseString = this.processclick_GET_request(getPermittedBroadcastsURL);
+            dynamic json = JValue.Parse(responseString);
+            JArray datafeed = json.broadcasts;
+            return datafeed;
+        }
+
+        public JArray getBroadcastsList(JArray datafeed)
         {
             JArray broadcastsList = new JArray();
 
@@ -168,6 +177,7 @@ namespace Excalibur.Models
             return broadcastsList;
 
         }
+
 
         public JArray getBroadcastChannelList(string broadcastID, JArray datafeed)
         {
@@ -217,7 +227,7 @@ namespace Excalibur.Models
                 filter = "followed";
             }
 
-            String responseString = this.processclick_GET_request(this.getChannelURL + "?filter=" + filter);
+            String responseString = this.processclick_GET_request(this.getAllBroadcastsURL + "?filter=" + filter);
             dynamic json = JValue.Parse(responseString);
             JArray datafeed = json.broadcasts;
             return datafeed;
@@ -308,7 +318,7 @@ namespace Excalibur.Models
         /// <param name="value">channel value</param>
         /// <param name="spreadsheet_id">spreadsheet_id</param>
         /// <returns>channel ID if successful</returns>
-        public string publishChannel(string description, string value, int spreadsheet_id)
+        public string publishChannel(string description, string value, int spreadsheet_id, int broadcast_id)
         {
             string returnID;
 
@@ -324,6 +334,7 @@ namespace Excalibur.Models
                 data.spreadsheet_id = spreadsheet_id;
 
                 datafeed.channel = data;
+                datafeed.broadcast = broadcast_id;
 
                 String responseFromServer = this.processclick_POST_request(postChannelURL, datafeed.ToString());
                 dynamic json = JValue.Parse(responseFromServer);
