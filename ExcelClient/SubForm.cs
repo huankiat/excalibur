@@ -62,26 +62,15 @@ namespace Excalibur.ExcelClient
             }
             else
             {
-                MessageBox.Show(d.ToString());
+              
+                JArray datafeed = ch.getBroadcastsList(d);
+                foreach (dynamic data in datafeed)
+                {
+                    broadcastComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());    
+                }
             }
 
 
-            //if (d == null)
-            //{
-            //    MessageBox.Show("Null Array");
-            //    //broadcastComboBox.Items.Add("No Broadcast");
-            //    //broadcastComboBox.SelectedIndex = 0;
-            //    //JArray datafeed = ch.getBroadcastsList(1, d);
-            //    //foreach (dynamic data in datafeed)
-            //    //{
-            //    //    broadcastComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());
-            //    //}
-            //}
-            //else
-            //{
-            //    broadcastComboBox.Items.Add("No Broadcast");
-            //    broadcastComboBox.SelectedIndex = 0;
-            //}
         }
 
         private void InitializeChannelComboBox()
@@ -89,7 +78,7 @@ namespace Excalibur.ExcelClient
 
             JArray d = ch.getAllBroadcastsChannels();
             JArray channelsList = ch.getBroadcastChannelList(broadcastID, d);
-            JArray datafeed = ch.filterPermittedChannels(1, channelsList);
+            JArray datafeed = ch.filterChannelsInBroadcast(channelsList);
             if (datafeed.ToString() != "[]")
             {
                 foreach (dynamic data in datafeed)
@@ -100,7 +89,7 @@ namespace Excalibur.ExcelClient
             else
             {
                 channelComboBox.Items.Add("No channel in broadcast");
-                //channelComboBox.SelectedIndex = 0;
+        
             }
         }
 

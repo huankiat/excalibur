@@ -67,6 +67,8 @@
             // forceCheckBox
             // 
             this.forceCheckBox.AutoSize = true;
+            this.forceCheckBox.Checked = true;
+            this.forceCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.forceCheckBox.Location = new System.Drawing.Point(93, 144);
             this.forceCheckBox.Name = "forceCheckBox";
             this.forceCheckBox.Size = new System.Drawing.Size(80, 17);

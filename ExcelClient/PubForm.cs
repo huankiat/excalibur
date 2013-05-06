@@ -35,12 +35,25 @@ namespace Excalibur.ExcelClient
         private void InitializePermittedBroadcastsComboBox()
         {
 
-            JArray d = ch.getPermittedBroadcastsChannels();
-            JArray broadcastsList = ch.getBroadcastsList(d);
-          
-            if (broadcastsList.ToString() != "[]")
+            
+
+            if (!TokenStore.checkTokenInStore())
             {
-                foreach (dynamic data in broadcastsList)
+                LoginForm frm = new LoginForm();
+                frm.Show();
+            }
+            else
+            {
+                ch.setAuthToken(TokenStore.getTokenFromStore());
+            }
+
+            JArray d = ch.getPermittedBroadcastsChannels();
+            JArray datafeed = ch.getBroadcastsList(d);
+
+            if (d.ToString() != "[]")
+            {
+          
+                foreach (dynamic data in datafeed)
                 {
                     broadcastComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());
                 }

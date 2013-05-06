@@ -71,12 +71,15 @@ namespace Excalibur.ExcelClient
             JArray d = ch.getAllBroadcastsChannels();
 
             //Need User ID to send into filterPermittedChannels
-            JArray datafeed = ch.filterPermittedChannels(1, d);
+            JArray datafeed = ch.filterChannelsInBroadcast(d);
             if (datafeed.ToString() != "[]")
             {
                 foreach (dynamic data in datafeed)
                 {
-                    pubComboBox.Items.Add(data.id.ToString() + "-" + data.description.ToString());
+                    foreach (dynamic c in data.channels)
+                    {
+                        pubComboBox.Items.Add(c.id.ToString() + "-" + c.description.ToString());
+                    }
                 }
             }
             else
@@ -112,8 +115,19 @@ namespace Excalibur.ExcelClient
             this.readSelectedChannel();
             ch.setAuthToken(TokenStore.getTokenFromStore());
 
+            string to_replace = "";
+            if (forceCheckBox.Checked)
+            {
+                to_replace = "true";
+            }
+            else
+            {
+                to_replace = "false";
+            }
+
             responseFromServer = ch.rePublishChannel(channelSelected, descriptionTextBox.Text, rng.Value.ToString(),
-                spreadSheetID, forceCheckBox.Checked);
+                spreadSheetID, to_replace);
+            MessageBox.Show(responseFromServer.ToString());
             if (responseFromServer == "409")
             {
                 MessageBox.Show(@"This workbook is not the original publisher. 

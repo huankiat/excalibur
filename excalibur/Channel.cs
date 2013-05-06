@@ -196,17 +196,15 @@ namespace Excalibur.Models
 
         }
 
-        public JArray filterPermittedChannels(int userID, JArray datafeed)
+        public JArray filterChannelsInBroadcast(JArray datafeed)
         {
             JArray filteredDataFeed = new JArray();
             foreach (JObject json in datafeed)
             {
                 dynamic j = new JObject();
                 j = json;
-                if ((j.owner_id == userID) | (j.assignee_id == userID))
-                {
-                    filteredDataFeed.Add(json);
-                }
+                filteredDataFeed.Add(json);
+           
             }
 
             return filteredDataFeed;
@@ -351,7 +349,7 @@ namespace Excalibur.Models
         }
 
         public string rePublishChannel(int channelID, string description, 
-            string value, int spreadsheet_id, bool to_replace)
+            string value, int spreadsheet_id, string to_replace)
         {
             var jsonObject = new JObject();
             dynamic datafeed = jsonObject;
@@ -364,7 +362,7 @@ namespace Excalibur.Models
             data.spreadsheet_id = spreadsheet_id;
 
             datafeed.channel = data;
-            datafeed.force = to_replace.ToString();
+            datafeed.force = to_replace;
 
             string responseFromServer=this.processclick_POST_request(rePubURL+ channelID.ToString() + ".json",
                                       datafeed.ToString(),"PUT");
@@ -448,7 +446,7 @@ namespace Excalibur.Models
                     string r_value = nRange.RefersToRange.Value.ToString();
                     int fileID = Convert.ToInt32(checkSpreadSheetID(wb));
                     string cellDesc = this.getChannelDesc(channelID.ToString());
-                    message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, false);                           
+                    message = this.rePublishChannel(channelID, cellDesc, r_value, fileID, "false");                           
                 }
             }
             
